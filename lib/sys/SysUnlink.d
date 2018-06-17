@@ -1,0 +1,5 @@
+DEFINITION MODULE SysUnlink;
+
+   PROCEDURE Unlink(name: ARRAY OF CHAR) : BOOLEAN;
+
+END SysUnlink.

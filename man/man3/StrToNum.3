@@ -1,0 +1,44 @@
+.TH StrToNum 3MOD "local: Hasch"
+.SH NAME
+StrToNum, StrToCard, StrToInt \- string to number conversions
+.SH SYNOPSIS
+.DS
+PROCEDURE StrToCard(str: ARRAY OF CHAR;
+                    VAR card: CARDINAL): BOOLEAN;
+
+PROCEDURE StrToInt(str: ARRAY OF CHAR;
+                   VAR integ: INTEGER): BOOLEAN;
+.DE
+.SH DESCRIPTION
+.I StrToCard
+converts
+.I str
+to the
+.B CARDINAL
+.IR card .
+Leading blanks, tabs, and newlines are ignored. If
+.I str
+does not fit the syntax, [+] {digit},
+or if the resulting number exceeds
+.B CARDINAL
+range, the function value will
+be
+.BR FALSE ,
+otherwise
+.BR TRUE .
+.PP
+.I StrToInt
+converts
+.I str
+to the
+.B INTEGER
+.I integ
+in analogous manner, where
+.I str
+must fit the syntax: [+|-] {digit} .
+.SH "SEE ALSO"
+Convers(3MOD)
+.SH BUGS
+If
+.I str
+contains no digit at all, it will be taken for zero.

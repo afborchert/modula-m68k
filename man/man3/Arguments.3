@@ -1,0 +1,210 @@
+.TH Arguments 3MOD "local: Hasch"
+.SH NAME
+Arguments, InitArgs, Usage, AllArgs, GetFlag, GetOpt, UngetOpt, GetArg, UngetArg, FetchString, FetchInt, FetchCard, FetchOct, FetchHex \(em procedures for command line processing
+.SH SYNOPSIS
+.DS
+PROCEDURE InitArgs(infostring: ARRAY OF CHAR);
+
+PROCEDURE Usage;
+
+PROCEDURE AllArgs;
+
+PROCEDURE GetFlag(VAR flag: CHAR): BOOLEAN;
+
+PROCEDURE GetOpt( VAR flag: CHAR; VAR plus: BOOLEAN): BOOLEAN;
+
+PROCEDURE UngetOpt;
+
+PROCEDURE GetArg(VAR argument: ARRAY OF CHAR): BOOLEAN;
+
+PROCEDURE UngetArg;
+
+PROCEDURE FetchString(VAR string: ARRAY OF CHAR);
+
+PROCEDURE FetchInt(   VAR number: INTEGER);
+
+PROCEDURE FetchCard(  VAR number: CARDINAL);
+
+PROCEDURE FetchOct(   VAR number: CARDINAL);
+
+PROCEDURE FetchHex(   VAR number: CARDINAL);
+.DE
+.SH DESCRIPTION
+The
+.I Arguments
+module
+supports reading and interpreting command arguments,
+according to the following standard:
+.RS
+.TP \w'\f3\(mi\f2x\0value\f1\0'u
+.BI \(mi x
+Flags
+are single characters preceded by a
+.BR \(mi .
+.TP
+.BI \(pl x
+Options,
+however, can be preceded either by
+.B \(mi
+or
+.BR \(pl .
+.TP
+.BI \(mi xy
+Flags
+or
+options
+with the same prefix
+may be concatenated to one command argument,
+without repeating the prefix.
+.TP
+.BI \(mi "x value"
+A
+value
+follows a
+flag/option
+as the rest of the command argument or as the next command argument.
+Nothing can follow a value in the same command argument.
+The type of a
+value
+may be one of the following:
+.I string,
+or an
+.SM
+.B INTEGER,
+.SM
+.B CARDINAL,
+.I octal
+or
+.I hexadecimal
+number.
+.TP
+.B \(mi
+as a command argument
+is interpreted as a non-flag/non-option argument.
+It should designate standard input or standard output
+in place of a file.
+.TP
+.B \(mi\(mi
+as a command argument
+terminates flag/option processing
+but is itself not interpreted as an argument.
+Successing command arguments,
+even when beginning with
+.B \(mi
+or
+.B \(pl
+are considered not to contain flags nor options.
+.RE
+.PP
+The procedures are used as follows:
+.PP
+.I InitArgs
+specifies
+.I infostring
+for
+.I Usage
+and (re)starts the reading cycle,
+i.e. makes the first command argument
+the next one to be read.
+.PP
+.I Usage
+prints 'Usage: command infostring' onto standard-error and aborts
+program execution ('command' stands here for the actual processes' name).
+.PP
+.I AllArgs
+calls
+.I Usage
+if any command arguments are not yet read.
+.PP
+.I GetFlag
+and
+.I GetOpt
+read one flag resp. option
+from the argument list
+or return
+.SM
+.B FALSE
+if all of them have been read.
+.I GetOpt
+sets
+.I plus
+.SM
+.B TRUE
+if the actual option is of the kind
+.BI \(pl x,
+otherwise
+.SM
+.BR FALSE .
+.PP
+.I GetArg
+reads one arbitrary argument or returns
+.SM
+.B FALSE
+if all arguments have been read already.
+.PP
+.IR FetchString ,
+.IR FetchInt ,
+.IR FetchCard ,
+.I FetchOct
+and
+.I FetchHex
+read a value
+of the specified type.
+If the selected argument (part) is missing,
+is not of the required type
+or if a numerical value exceeds the range of
+.IR number ,
+.I Usage
+is called implicitly.
+.PP
+.I UngetOpt
+and
+.I UngetArg
+push back one
+flag/option
+resp.
+argument
+per call
+to the list of not yet read command arguments.
+Note that
+.I UngetOpt
+is not able to skip command arguments
+that have been read using
+.I GetArg
+or
+one of the
+.I FetchXXX
+procedures.
+.PP
+The following example may illustrate how to use some of the procedures:
+.RS
+.nf
+
+xflag := FALSE;
+number := 1;
+string := defaultstring;
+InitArgs("[-x] [-s string] [-nnn] [file]...");
+WHILE GetFlag(flag) DO
+   CASE flag OF
+      "x":     xflag := TRUE;
+   |  "s":     FetchString(string);
+   |  "0".."9":
+               UngetOpt;
+               FetchCard(number);
+      ELSE  Usage
+   END;
+END; (*WHILE GetFlag*)
+WHILE GetArg(filename) DO
+   IF StrCmp(filename,"-") = 0 THEN
+      (* process stdin *)
+   ELSE
+      (* process filename *)
+   END;
+END; (*WHILE GetArg*)
+.fi
+.RE
+.SH "SEE ALSO"
+ARGC(3MOD), StrToNum(3MOD), Strings(3MOD), StrSpec(3MOD), StdIO(3MOD)
+.SH AUTHOR
+Martin Hasch,
+University of Ulm

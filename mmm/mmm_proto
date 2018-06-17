@@ -1,0 +1,19 @@
+# {created by mmm: Fri Mar 25 17:30:30 1988 MEZ}
+# {flags: -a- -l- -L- -1- -v-}
+# {rules}
+# {macros}
+# {precious}
+# {all}
+# {linkage}
+# {dependencies}
+#
+tags:		$(TAGSRC)
+		mtags $(TAGSRC)
+#
+SPOOL =		lp
+pr:		Pr.date
+Pr.date:	$(SRC)
+		pr $? | $(SPOOL)
+		-touch Pr.date
+#
+clean:		; rm -f $(OBJS) $(SYMS) $(REFS)

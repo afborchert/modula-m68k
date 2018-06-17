@@ -1,0 +1,83 @@
+.TH Attributes 3MOD "local:Borchert"
+.SH NAME
+Attributes \- set terminal display attributes
+.SH SYNOPSIS
+.nf
+TYPE Attribute = (standout, underline, reverse, blink,
+                  dim, bold, blank, protect, alternate);
+TYPE AttributeSet = SET OF Attribute;
+TYPE AttrInfo;
+
+VAR Done: BOOLEAN;
+
+PROCEDURE OpenAttrInfo(VAR atinfo: AttrInfo;
+                       VAR tinfo: Term;
+                       baudrate: CARDINAL;
+                       out: FILE);
+
+PROCEDURE CloseAttrInfo(VAR atinfo: AttrInfo);
+
+PROCEDURE AvailableAttributes(atinfo: AttrInfo;
+                              VAR atset: AttributeSet);
+
+PROCEDURE SetAttribute(atinfo: AttrInfo; at: Attribute);
+
+PROCEDURE SetAttributes(atinfo: AttrInfo; atset: AttributeSet);
+
+PROCEDURE ResetAttribute(atinfo: AttrInfo; at: Attribute);
+
+PROCEDURE ResetAttributes(atinfo: AttrInfo);
+.fi
+.SH DESCRIPTION
+.I Attributes
+allows to set display attributes on terminals
+as defined in the terminfo(4) database.
+.I OpenAttrInfo
+associates
+.I atinfo
+(which is to be given as reference on further calls)
+with a terminal description and an output file pointer.
+Padding depends on
+.I baudrate.
+If
+.I baudrate
+is zero no padding will be done.
+The terminal description
+.I tinfo
+must be non-local because
+.I Attributes
+does not copy it but keeps a pointer to it.
+The space associated with
+.I atinfo
+can be released by calling
+.I CloseAttrInfo.
+.I AvailableAttributes
+returns the set of supported attributes.
+.PP
+.I SetAttribute
+enters the given display mode.
+Characters written in the following are printed in this mode.
+This mode is potentially left in case of cursor movements
+or even on going to the next line.
+Multiple calls of
+.I SetAttribute
+can affect modes set earlier.
+.I SetAttributes
+should be used instead.
+.I ResetAttribute
+exits the display mode previously entered by
+.I SetAttribute.
+.I SetAttributes
+allows to set several modes simultaneously.
+But this does not work well on every terminal.
+.I ResetAttributes
+restores the terminal to a normal state
+without any display attributes set.
+.SH "SEE ALSO"
+TermInfo(3MOD), Windows(3MOD)
+.SH BUGS
+Some terminals code display modes in one or more extra characters
+(represented as blanks on the screen).
+The number of extra characters used by the terminal
+is found in
+.I tinfo^.MagicCookieGlitch.

@@ -1,0 +1,42 @@
+.TH PipeIO 3MOD "local:Borchert"
+.SH NAME
+PipeIO, Popen, Pclose \- initiate I/O to/from a process
+.SH SYNOPSIS
+.DS
+FROM StdIO IMPORT FILE, MODE;
+
+PROCEDURE Popen(VAR f: FILE; cmd: ARRAY OF CHAR; mode: MODE;
+                buffered: BOOLEAN) : BOOLEAN;
+
+PROCEDURE Pclose(f: FILE) : BOOLEAN;
+.DE
+.SH DESCRIPTION
+.I Popen
+creates a pipe between the calling process and the command to
+be executed.
+.I Cmd
+is a string containing a shell command line,
+.I mode
+specifies the I/O mode, either
+.I read
+for reading or
+.I write
+for writing,
+.I buffered
+flags if the stream has to be buffered.
+The resulting stream pointer will be returned in
+.IR f .
+.PP
+A stream opened by
+.I Popen
+should be closed by
+.IR Pclose ,
+which waits for the associated process
+to terminate.
+.SH DIAGNOSTICS
+.I Popen
+and
+.I Pclose
+return
+.B FALSE
+on failure.

@@ -1,0 +1,62 @@
+.TH Files 3MOD "local:Borchert"
+.SH NAME
+Files, OpenRead, OpenWrite, Close, SetPos, GetPos,
+Reset, Delete, Rename \- file handling
+.SH SYNOPSIS
+.PP
+.DS
+TYPE FILE = StdIO.FILE;
+
+VAR Done: BOOLEAN;
+
+PROCEDURE OpenRead(VAR f: FILE; filename: ARRAY OF CHAR);
+
+PROCEDURE OpenWrite(VAR f: FILE;
+                    filename: ARRAY OF CHAR);
+
+PROCEDURE Close(f: FILE);
+
+PROCEDURE SetPos(f: FILE; pos: LONGCARD);
+
+PROCEDURE GetPos(f: FILE; VAR pos: LONGCARD);
+
+PROCEDURE Reset(f: FILE);
+
+PROCEDURE Delete(filename: ARRAY OF CHAR);
+
+PROCEDURE Rename(oldname, newname: ARRAY OF CHAR);
+.DE
+.SH DESCRIPTION
+.I OpenRead
+and
+.I OpenWrite
+open the file named
+.I filename
+for reading/writing and return the filepointer
+.IR f .
+.PP
+.I Close
+causes any buffers for the named stream to be emptied,
+and the file to be closed.
+.PP
+.I GetPos
+and
+.I SetPos
+get/set the position of the filepointer
+.IR f .
+.I Reset
+is equivalent to
+.I SetPos(f, 0).
+.PP
+.I Delete
+and
+.I Rename
+are self-explanatory.
+.SH DIAGNOSTICS
+.I Done
+is
+.B TRUE
+on successful calls, otherwise
+.BR FALSE .
+.SH "SEE ALSO"
+StdIO(3MOD), FtdIO(3MOD)

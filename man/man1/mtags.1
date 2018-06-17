@@ -1,0 +1,28 @@
+.TH MTAGS 1 "local: Borchert"
+.SH NAME
+mtags \- create a tags file for Modula-2 sources
+.SH SYNOPSIS
+.B mtags
+name ...
+.SH DESCRIPTION
+.I Mtags
+makes a tags file for
+.IR ex (1)
+from the specified Modula-2 sources.
+A tags file gives the locations of specified objects (in this case
+procedures) in a group of files.
+Each line of the tags file contains the procedure name,
+the file in which it is defined, and a scanning pattern used to find
+the procedure definition.
+These are given in separate fields on the line,
+separated by blanks or tabs.
+Using the
+.I tags
+file,
+.I ex
+can quickly find these procedure definitions.
+.SH FILES
+.DT
+tags		output tags file
+.SH SEE ALSO
+ex(1), vi(1)

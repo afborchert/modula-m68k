@@ -1,0 +1,170 @@
+.TH Menus 3MOD "local:Borchert"
+.SH NAME
+Menus \- display and execution of menu windows
+.SH SYNOPSIS
+.nf
+TYPE Menu;
+
+VAR Done: BOOLEAN;
+
+PROCEDURE CreateMenu(VAR menu: Menu;
+                     title: ARRAY OF CHAR);
+
+PROCEDURE AddCommand(menu: Menu;
+                     cmd: ARRAY OF CHAR;
+                     cmdno: CARDINAL);
+
+PROCEDURE AddProcedure(menu: Menu;
+                       cmd: ARRAY OF CHAR;
+                       cmdproc: PROC);
+
+PROCEDURE AddSubMenu(menu: Menu;
+                     cmd: ARRAY OF CHAR;
+                     submenu: Menu);
+
+PROCEDURE ExecMenu(menu: Menu; background: Window;
+                   VAR selected: CARDINAL);
+
+PROCEDURE DisposeMenu(VAR menu: Menu);
+.fi
+.SH DESCRIPTION
+.I Menus
+is based on
+.I Windows
+and allows to create and execute menus.
+A menu
+with headline
+.I title
+is created calling
+.I CreateMenu.
+The headline may be empty.
+The resulting parameter
+.I menu
+is used as reference on subsequent calls.
+.I DisposeMenu
+releases the space allocated with it.
+.PP
+A menu is constructed line by line by calling either
+.I AddSubMenu,
+.I AddProcedure,
+or
+.I AddCommand.
+The text to be printed on the menu line is given in
+.I cmd.
+.I AddSubMenu
+allows the construction of hierarchical menus.
+The parameter
+.I submenu
+must be initialized previously by
+.I CreateMenu
+but is not necessarily complete.
+So, recursive menus are possible.
+.I AddProcedure
+causes
+.I cmdproc
+to be called if the associated menu line is selected.
+After having called
+.I cmdproc
+the user returns to the menu point selected previously.
+.I AddCommand
+causes on selection the complete menu hierarchy to disappear.
+The parameter
+.I cmdno
+is then returned in
+.I selected
+of
+.I ExecMenu.
+.PP
+.I ExecMenu
+creates a window using
+.I NewWindow
+(see
+.IR Windows(3MOD) )
+which fits into
+.I background.
+The window is boxed and consists of the
+underlined header line and the lines defined by
+.I AddSubMenu,
+.I AddProcedure,
+and
+.I AddCommand.
+The location of the
+upper left corner depends on the current position in
+.I background.
+The size of the window depends on the number of menu lines
+and the maximum width of the
+.I cmd
+parameters and the headline.
+If the number of lines does not fit into
+.I background
+only a part of the menu is displayed,
+but scroll commands and a scroll bar
+enable quick access to the other parts.
+.I ExecMenu
+returns
+when the menu is left,
+or a menu line created by
+.I AddCommand
+is selected.
+The resulting parameter
+.I selected
+equals 0
+if the menu is left.
+The menu must not be changed during running
+.I ExecMenu
+by the procedures given to
+.I AddProcedure.
+But it is possible to append further menu lines when
+.I ExecMenu
+returns.
+If calls of
+.I ExecMenu
+are nested
+(due to calls of procedures given to
+.IR AddProcedure )
+redisplays
+(on return of such procedures)
+affect the innermost menu hierarchy only.
+.PP
+Menu selection is done by function keys:
+.I up
+and
+.I down
+for movement,
+.I right
+for selection,
+and
+.I left
+for leaving the menu.
+Alternatively the
+.I vi
+movement commands ('h', 'j', 'k', and 'l')
+and the return key for menu selection can be used.
+The
+.I vi
+commands for fast movement can be used
+on menus with scroll bar as follows:
+.IP
+.ta \w'^D  'u
+.br
+^D	half page forward
+.br
+^F	full page forward
+.br
+^U	half page backward
+.br
+^B	full page backward
+.br
+.SH DIAGNOSTICS
+.I Done
+is set to
+.B FALSE
+if
+.I ExecMenu
+fails.
+This is possible if
+.I background
+has less then four lines
+or not enough columns.
+.SH "SEE ALSO"
+Windows(3MOD), vi(1)

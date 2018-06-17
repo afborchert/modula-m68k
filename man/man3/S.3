@@ -1,0 +1,116 @@
+.ds iN "\f2i1\fP\ \&.\&. \f2i8\fP
+.ie t .ds St "\v'.3m'\s+3*\s-3\v'-.3m'
+.el .ds St *
+.de cC
+.IP "\f3\\$1\fP"
+..
+.TH S 3MOD "local:Stanglow"
+.SH NAME
+S, printf0, printf1, printf2, printf3, printf4, printf5, printf6, printf7, printf8, done, success, setmode, getmode \- formatted output to strings
+.SH SYNOPSIS
+.DS
+(* diagnostic *)
+
+PROCEDURE done () : BOOLEAN;
+
+PROCEDURE success() : FmtExitCode;
+
+(* error handling *)
+
+PROCEDURE setmode (mode : BITSET);
+
+PROCEDURE getmode (VAR mode : BITSET);
+
+(* output *)
+
+PROCEDURE printf0 (VAR string : ARRAY OF CHAR; fmt : ARRAY OF CHAR);
+
+PROCEDURE printf1 (VAR string : ARRAY OF CHAR; fmt : ARRAY OF CHAR; i1 : ARRAY OF BYTE);
+
+PROCEDURE printf2 (VAR string : ARRAY OF CHAR; fmt : ARRAY OF CHAR; i1,i2 : ARRAY OF BYTE);
+
+(* ... *)
+
+PROCEDURE printf8 (VAR string : ARRAY OF CHAR;
+   fmt : ARRAY OF CHAR; i1, i2, i3, i4, i5,
+   i6, i7 , i8 : ARRAY OF BYTE);
+.DE
+.SH DESCRIPTION
+.I printf0
+\&..\&
+.I printf8
+convert their parameters \*(iN,
+instantiate them into the format string
+.I fmt
+and write the resulting text into
+.I string .
+A null byte is appended if
+.I string
+is large enough.
+Refer to
+.IR Printf (3MOD)
+for a detailed description of formatting
+capabilities.
+.LP
+.I done
+returns
+.B TRUE
+if the
+last call of
+.IR printf0
+\&..\&
+.IR printf8
+was successful,
+more detailed information
+can be obtained
+by
+.I success
+.RI (FmtExitCode
+is imported from
+.IR Printf).
+.LP
+.I setmode
+defines a new error handling mode
+.I mode
+which is by default
+set to
+.IR Printf . Default.
+.I getmode
+yields the current mode.
+.SH DIAGNOSTICS
+Diagnostic is unnecessary
+unless default
+error handling strategy has been explicitly
+modified
+by prior calls
+of
+.IR setmode \&.
+See
+.IR Printf (3MOD)
+for more details.
+.LP
+Besides for reasons of illegal format
+strings,
+.I printf1
+\&.\&.
+.I printf8
+will fail 
+if
+.I string
+is too small
+(error code
+.BR StringTooSmall).
+.LP
+Error messages issued by
+.I S
+will contain information
+about their
+reason and the affected procedure call:
+.IP
+.DS
+[fatal] S.printf0(...,"Hallo.");
+        Illegal parameter values: string too small.
+[a.out] Exit code 203. Stop.
+.DE
+.SH "SEE ALSO"
+.IR Printf (3MOD)

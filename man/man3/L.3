@@ -1,0 +1,119 @@
+.ds iN "\f2i1\fP\ \&.\&. \f2i8\fP
+.ie t .ds St "\v'.3m'\s+3*\s-3\v'-.3m'
+.el .ds St *
+.de cC
+.IP "\f3\\$1\fP"
+..
+.TH L 3MOD "local:Stanglow"
+.SH NAME
+L, printf0, printf1, printf2, printf3, printf4, printf5, printf6, printf7, printf8, done, success, setmode, getmode \- append formatted output to longs
+.SH SYNOPSIS
+.DS
+(* diagnostic *)
+
+PROCEDURE done () : BOOLEAN;
+
+PROCEDURE success() : FmtExitCode;
+
+(* error handling *)
+
+PROCEDURE setmode (mode : BITSET);
+
+PROCEDURE getmode (VAR mode : BITSET);
+
+(* output *)
+
+PROCEDURE printf0 (long : Long; fmt : ARRAY OF CHAR);
+
+PROCEDURE printf1 (long : Long; fmt : ARRAY OF CHAR;
+   i1 : ARRAY OF BYTE);
+
+PROCEDURE printf2 (long : Long; fmt : ARRAY OF CHAR;
+   i1,i2 : ARRAY OF BYTE);
+
+(* ... *)
+
+PROCEDURE printf8 (long : Long; fmt : ARRAY OF CHAR;
+   i1, i2, i3, i4, i5, i6, i7 , i8 : ARRAY OF BYTE);
+.DE
+.SH DESCRIPTION
+.I printf0
+\&..\&
+.I printf8
+convert their parameters \*(iN,
+instantiate them into the format string
+.I fmt
+and append the resulting text to
+.IR long .
+Refer to
+.IR Printf (3MOD)
+for a detailed description of formatting
+capabilities.
+.LP
+Since the prior contents of
+.I long
+remains uneffected by
+further calls of
+.I printf0
+\&..\&
+.I printf8
+the output can
+be collected.
+Allocation and handling
+of
+.I long
+is in responsibility of
+the environment
+using
+.IR L \&.
+.IR LongStrings (3MOD)
+and
+.IR OutLines (3MOD)
+provide the necessary procedures.
+.LP
+.I done
+returns
+.B TRUE
+if the
+last call of
+.I printf0
+\&..\&
+.I printf8
+was successful,
+more detailed information
+can be obtained
+by
+.I success
+.RI (FmtExitCode
+is imported from
+.IR Printf).
+.LP
+.I setmode
+defines a new error handling mode
+.I mode
+which is by default
+set to
+.IR Printf . Default.
+.I getmode
+yields the current mode.
+.SH DIAGNOSTICS
+Diagnostic is unnecessary
+unless default
+error handling strategy has been explicitly
+modified
+by prior calls
+of
+.IR setmode \&.
+See
+.IR Printf (3MOD)
+for more details.
+.IP
+.DS
+[fatal] L.printf1(...,"%h",...);
+        Bad format: illegal conversion character.
+[a.out] Exit code 205. Stop.
+.DE
+.SH "SEE ALSO"
+.IR Printf (3MOD),
+.IR LongStrings (3MOD),
+.IR OutLines (3MOD)

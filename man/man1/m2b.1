@@ -1,0 +1,61 @@
+.TH M2B 1 "local:Borchert"
+.SH NAME
+m2b \- Modula-2 beautifier
+.SH SYNOPSIS
+m2b [ arg ] ... [ infile [ outfile ] ]
+.SH DESCRIPTION
+.I M2b
+is a beautifier (i.e., formator) for Modula-2 programs.
+.I M2b
+accepts the revised Modula-2 grammar.
+.I Infile
+(default standard input) is formatted and stored in
+.I outfile
+(default standard output).
+The arguments are interpreted as follows:
+.TP 5
+.B \-c
+\c
+the following argument defines where comments are aligned (default 40).
+.TP 5
+.B \-h
+\c
+requests the header to be printed.
+.TP 5
+.B \-l
+\c
+the following argument defines the approximate output line length (default 80);
+zero length means no limit. Comments are not shortened.
+.TP 5
+.B \-p
+\c
+requests parameter lists to be piled.
+.TP 5
+.B \-s
+\c
+the following argument defines indentation width (default 3).
+.TP 5
+.B \-v
+\c
+requests variable declarations to be piled.
+.PP
+The options can also be set from within a Modula-2 source
+using a comment as follows:
+.TP
+(*%p+;c40*)
+requests parameter lists to be piled and sets the comment column at 40.
+Blanks are not permitted, `%' signals the controlling comment,
+and `;' joins several options.
+All command line options are supported in this fashion.
+.TP
+(*%\-*)
+turns formating off. Subsequent text is passed through as is
+until `%+' is found.
+.TP
+%+
+turns formating back on.
+Modula-2 syntax and formator operation
+must be nested properly.
+.PP
+.I M2b
+can be used as a filter.

@@ -1,0 +1,114 @@
+Unit =          { SYMBOLSY ModuleKey Module }
+                  ( DEFINITIONSY | IMPLEMENTATIONSY | MODULESY )
+                  Module EOP .
+ModuleKey =     CARDCON Value CARDCON Value CARDCON Value .
+Module =        Ident [ Priority ] { Import } [ Export ] Block .
+Ident =         IDENT SpellIndex .
+SpellIndex =    Number .
+Priority =      LBRACK Constant RBRACK .
+Value =         Number .
+Import =        IMPORTSY IdentList | FROMSY Ident IdentList .
+IdentList =     Ident { Ident } .
+Export =        EXPORTSY IdentList | QUALIFIEDSY IdentList .
+Block =         { Definition } [ BEGINSY StatSequence ] ENDBLOCK .
+Definition =    CONSTSY { ConstDecl } |
+                TYPESY { TypeDecl } |
+                VARSY { VarDecl } |
+                PROCEDURESY Procedure |
+                MODULESY Module .
+ConstDecl =     Ident Constant .
+Constant =      ConstExpr .
+ConstExpr =     SimpleConstExpr [ RelOp SimpleConstExpr ] .
+SimpleConstExpr = [ PLUS | MINUS ] ConstTerm
+                    { AddOp ConstTerm } .
+ConstTerm =     ConstFact { MulOp ConstFact } .
+ConstFact =     INTCON Value |
+                CARDCON Value [ SymType ] |
+                INTCARCON TypeSet Value |
+                CHARCON Value |
+                REALCON EntryAddr |     (* real value in heap *)
+                STRINGCON EntryAddr Length |
+                QualIdent [ ConstSetConstr | ConstParamList ] |
+                ConstSetConstr |
+                LPARENT ConstExpr RPARENT |
+                NOTSY ConstFact .
+ConstParamList = LPARENT ConstExpr { COMMA ConstExpr } RPARENT .
+TypeSet =       Value . (* of type Stset *)
+SymType =       QualIdent .             (* typename of constant *)
+QualIdent =     Ident { PERIOD Ident } .
+EntryAddr =     Number .
+Length =        Number .
+ConstSetConstr = LCONBR { ConstElem } RCONBR |
+                BIGSETCON EntryAddr .   (* SetValuePtr *)
+ConstElem =     ConstExpr [ RANGE ConstExpr ] .
+TypeDecl =      Ident Type .
+Type =          SimpleType |
+                HIDDEN |
+                ARRAYSY SimpleType { COMMA SimpleType } OFSY Type |
+                RECORDSY { FieldList } ENDSY [ SymSize ] |
+                SETSY SimpleType |
+                POINTERSY Type |
+                PROCEDURESY [ FormalTypeList ] .
+SimpleType =    QualIdent | [ QualIdent ] Subrange | Enumeration .
+Subrange =      LBRACK Constant RANGE Constant RBRACK .
+Enumeration =   LPARENT { Ident [ SymValue ] } RPARENT .
+SymValue =      CARDCON Value .
+FieldList =     { Ident [ SymOffset ] } COLON Type |
+                CASESY [ Ident ] COLON QualIdent
+                  { OFSY { ConstElem | SymVarVal } COLON
+                    { FieldList } [ SymSize ] }
+                  [ ELSESY { FieldList } [ SymSize ] ] ENDSY .
+SymOffset =     CARDCON Value .
+SymVarVal =     CARDCON Value .
+SymSize =       CARDCON Value .
+FormalTypeList = LPARENT { [ VARSY ] FormalType } RPARENT
+                   [ COLON QualIdent ] .
+FormalType =    [ ARRAYSY ] QualIdent .
+VarDecl =       { Ident [ Address ] } COLON Type .
+Address =       AbsAddress | SymAddress .
+AbsAddress =    LBRACK Constant RBRACK .
+SymAddress =    CARDCON Value .
+Procedure =     Ident ( SymProcNum PROCEDURESY FormalTypeList |
+                  [ FormalParList ] [ Block ] ) .
+SymProcNum =    CARDCON Value .
+FormalParList = LPARENT
+                  { [ VARSY ] { Ident } COLON FormalType }
+                  RPARENT [ COLON QualIdent ] .
+StatSequence =  { Statement } .
+Statement =     BECOMES Designator COMMA Expression |
+                CALL Designator ParamList |
+                IFSY Expression StatSequence
+                  { ELSIFSY Expression StatSequence }
+                  [ ELSESY Expression StatSequence ] ENDSY |
+                WITHSY Designator StatSequence ENDSY |
+                CASESY Expression
+                  { OFSY { ConstElem } COLON StatSequence }
+                  [ ELSESY StatSequence ] ENDSY |
+                LOOPSY StatSequence ENDSY |
+                WHILESY Expression StatSequence ENDSY |
+                REPEATSY StatSequence UNTILSY Expression |
+                FORSY Ident COMMA Expression TOSY Expression
+                  [ BYSY Constant ] StatSequence ENDSY |
+                RETURNSY [ LPARENT Expression RPARENT ] |
+                EXITSY .
+Expression =    SimpleExpr [ RelOp SimpleExpr ] .
+RelOp =         EQL | NEQ | GRT | GEQ | LSS | LEQ | INSY .
+SimpleExpr =    [ MINUS ] Term { AddOp Term } .
+AddOp =         PLUS | MINUS | ORSY .
+Term =          Factor { MulOp Factor } .
+MulOp =         TIMES | SLASH | DIVSY | MODSY | ANDSY .
+Factor =        INTCON Value |
+                CARDCON Value |
+                INTCARCON Value |
+                CHARCON Value |
+                REALCON EntryAddr |     (* real value in heap *)
+                STRINGCON EntryAddr Length |
+                SetConstr |
+                Designator [ ParamList | SetConstr ] |
+                NOTSY Factor |
+                LPARENT Expression RPARENT .
+SetConstr =     LCONBR { Element } RCONBR .
+Element =       Expression [ RANGE Element ] .
+Designator =    QualIdent { LBRACK Expression RBRACK |
+                  PERIOD Ident | ARROW } .
+ParamList =     LPARENT [ Expression { COMMA Expression } ] RPARENT .

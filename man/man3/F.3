@@ -1,0 +1,123 @@
+.ds iN "\f2i1\fP\ \&.\&. \f2i8\fP
+.ie t .ds St "\v'.3m'\s+3*\s-3\v'-.3m'
+.el .ds St *
+.de cC
+.IP "\f3\\$1\fP"
+..
+.TH F 3MOD "local:Stanglow"
+.SH NAME
+F, printf0, printf1, printf2, printf3, printf4, printf5, printf6, printf7, printf8, done, success, setmode, getmode \- formatted output to files
+.SH SYNOPSIS
+.nf
+(* diagnostic *)
+
+PROCEDURE done () : BOOLEAN;
+.sp 0.8v
+PROCEDURE success() : FmtExitCode;
+
+(* error handling *)
+
+PROCEDURE setmode (mode : BITSET);
+.sp 0.8v
+PROCEDURE getmode (VAR mode : BITSET);
+
+(* output *)
+
+PROCEDURE printf0 (file : FILE; fmt : ARRAY OF CHAR);
+.sp 0.8v
+PROCEDURE printf1 (file : FILE; fmt : ARRAY OF CHAR; i1 : ARRAY OF BYTE);
+.sp 0.8v
+PROCEDURE printf2 (file : FILE; fmt : ARRAY OF CHAR; i1,i2 : ARRAY OF BYTE);
+.sp 0.8v
+(* ... *)
+.sp 0.8v
+PROCEDURE printf8 (file : FILE; fmt : ARRAY OF CHAR;
+   i1, i2, i3, i4, i5, i6, i7 , i8 : ARRAY OF BYTE);
+.fi
+.SH DESCRIPTION
+.I printf0
+\&..\&
+.I printf8
+convert their parameters \*(iN,
+instantiate them into the format string
+.I fmt
+and write the resulting text to the file
+.I file .
+Refer to
+.IR Printf (3MOD)
+for a detailed description of formatting
+capabilities.
+.LP
+The output
+to
+.I file
+is echoed
+after suitable calls
+of
+.IR LongStrings \&. Echo .
+.LP
+.I done
+returns
+.B TRUE
+if the
+last call of
+.I printf0
+\&..\&
+.I printf8
+was successful,
+more detailed information
+can be obtained
+by
+.I success
+.RI (FmtExitCode
+is imported from
+.IR Printf).
+.LP
+.I setmode
+defines a new error handling mode
+.I mode
+which is by default
+set to
+.IR Printf . Default.
+.I getmode
+yields the current mode.
+.SH DIAGNOSTICS
+Diagnostic is unnecessary
+unless default
+error handling strategy has been explicitly
+modified
+by prior calls
+of
+.IR setmode \&.
+See
+.IR Printf (3MOD)
+for more details.
+.LP
+Besides for reasons of illegal format
+strings,
+.I printf1
+\&.\&.
+.I printf8
+will fail 
+if
+.I file
+cannot be written
+(error code
+.BR CannotWriteFile ).
+.LP
+Error messages issued by
+.I F
+will contain information
+about
+the their reason (including a system message if available)
+and the affected procedure call:
+.IP
+.DS
+[fatal] F.printf0(...,"Hallo.\n");
+        Bad file number: cannot write to file.
+[a.out] Exit code 202. Stop.
+.DE
+.SH "SEE ALSO"
+.IR Printf (3MOD),
+.IR StdIO (3MOD),
+.IR LongStrings (3MOD)

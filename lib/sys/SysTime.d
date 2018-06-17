@@ -1,0 +1,7 @@
+DEFINITION MODULE SysTime; (* AFB 4/84 *)
+
+   FROM SystemTypes IMPORT TIME;
+
+   PROCEDURE Time(VAR t: TIME) : BOOLEAN;
+
+END SysTime.

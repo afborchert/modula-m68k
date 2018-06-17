@@ -1,0 +1,29 @@
+.TH ASCII 3MOD "local:Borchert"
+.SH NAME
+ASCII \- control characters
+.SH SYNOPSIS
+.DS
+CONST
+
+   (* control characters *)
+
+   nul = 0C;   ht  = 11C;  dc2 = 22C;  esc = 33C;  
+   soh = 1C;   lf  = 12C;  dc3 = 23C;  fs  = 34C;  
+   stx = 2C;   vt  = 13C;  dc4 = 24C;  gs  = 35C;  
+   etx = 3C;   ff  = 14C;  nak = 25C;  rs  = 36C;  
+   eot = 4C;   cr  = 15C;  syn = 26C;  us  = 37C;  
+   enq = 5C;   so  = 16C;  etb = 27C;  sp  = 40C;  
+   ack = 6C;   si  = 17C;  can = 30C;  
+   bel = 7C;   dle = 20C;  em  = 31C;  
+   bs  = 10C;  dc1 = 21C;  sub = 32C;  
+
+   (* other usual names *)
+
+   null = nul;
+   bell = bel;
+   nl   = lf; (* new line *)
+   tab  = ht;
+   np   = ff; (* new page *)
+
+   del  = 177C;
+.DE

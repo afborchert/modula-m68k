@@ -1,0 +1,59 @@
+Unit =          Header { SymbolModule } ENDFILESS .
+Header =        SymFile ModuleKey DefModName .
+SymFile =       Value . (* symbol file syntax version *)
+Value =         NORMALCONSTSS Number .
+ModuleKey =     Value Value Value .
+DefModName =    Ident . (* name of compiled definition module *)
+Ident =         IDENTSS Letter { Letter | Digit } '0C' .
+SymbolModule =  UNITSS ModuleKey Ident
+                  [ IMPORTSS { Ident } ]
+                  [ EXPORTSS { Ident } ]
+                  { Definition } ENDUNITSS .
+Definition =    CONSTSS { ConstDeclaration } |
+                TYPESS { TypeDeclaration } |
+                PROCSS ProcedureHeading |
+                VARSS { VarDeclaration } .
+ConstDeclaration = Ident Constant .
+Constant =      Value QualIdent |
+                RealConst |
+                StringConst |
+                BigSetConst |
+                IntCarConst .
+QualIdent =     Ident [ PERIODSS Ident ] .
+RealConst =     REALCONSTSS RHigh RLow .
+RHigh =         Number . (* upper part of real number *)
+RLow =          Number . (* lower part of real number *)
+StringConst =   STRINGCONSTSS { Character } '0C'
+BigSetConst =   QualIdent BIGSETCONSTSS
+                  SetSize SetOffset { Number } .
+SetSize =       Number . (* # Numbers in BigSetConst *)
+SetOffset =     Number .
+IntCarConst =   INTCARCONSTSS TypeSet Number .
+TypeSet =       Number . (* of type Stset *)
+TypeDeclaration = Ident Type .
+Type =          SimpleType | HIDDENTYPSS | ArrayType |
+                RecordType | SetType | PointerType | ProcType .
+SimpleType =    QualIdent | Enumeration | Subrange .
+Enumeration =   LPARENTSS { Ident Value } RPARENTSS .
+Subrange =      QualIdent LBRACKETSS
+                   Constant RANGESS Constant RBRACKETSS .
+ArrayType =     ARRAYTYPSS SimpleType OFSS Type .
+RecordType =    RECORDTYPSS { Fields } [ Variants ] ENDSS Size .
+Fields =        Ident Offset COLONSS Type .
+Variants =      CASESS COLONSS QualIdent
+                  { OFSS { VarVal } COLONSS [ Variants ] Size }
+                  [ ELSESS [ Variants ] Size ] ENDSS .
+Size =          Value .
+Offset =        Value .
+VarVal =        Value .
+SetType =       SETTYPSS SimpleType .
+PointerType =   POINTERTYPSS Type .
+ProcType =      PROCSS LPARENTSS
+                  { [ VARSS ] [ ARRAYTYPSS ] QualIdent }
+                  RPARENTSS [ COLONSS QualIdent ] .
+ProcedureHeading = Ident ProcNum ProcType .
+ProcNum =       Value .
+VarDeclaration = Ident Address COLONSS Type .
+Address =       RelAddr | AbsAddr .
+RelAddr =       Value .
+AbsAddr =       LBRACKETSS Value RBRACKETSS .

@@ -1,0 +1,5 @@
+DEFINITION MODULE SysWait;
+
+   PROCEDURE Wait(VAR pid, status: CARDINAL) : BOOLEAN;
+
+END SysWait.

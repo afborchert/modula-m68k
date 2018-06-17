@@ -1,0 +1,8 @@
+DEFINITION MODULE PrioTab;
+
+   FROM SystemTypes IMPORT Sig;
+
+   VAR
+      PrioTab: ARRAY[SIGRTI..SIGUSR2] OF CARDINAL;
+
+END PrioTab.

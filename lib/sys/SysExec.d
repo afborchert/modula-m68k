@@ -1,0 +1,9 @@
+DEFINITION MODULE SysExec;
+
+   FROM SYSTEM IMPORT ADDRESS;
+
+   PROCEDURE Exec(name: ARRAY OF CHAR; argv: ADDRESS);
+
+   PROCEDURE Exece(name: ARRAY OF CHAR; argv, envp: ADDRESS);
+
+END SysExec.

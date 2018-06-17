@@ -1,0 +1,485 @@
+.TH Windows 3MOD "local:Borchert"
+.SH NAME
+Windows \- screen handling routines
+.SH SYNOPSIS
+.nf
+TYPE TermType = ARRAY[0..31] OF CHAR;
+TYPE Device;
+TYPE Terminfo;
+TYPE Window;
+TYPE WindowAttributes = (flushalways, flushoninput,
+                         nodelay, echo, scroll, movecursor,
+                         funckeys, timeout, mapkeys, readcr);
+TYPE WindowAtSet = SET OF WindowAttributes;
+TYPE WindowStatbuf =
+        RECORD
+           dev: Device;
+           in, out: FILE;
+           fkinfo: FKInfo;
+           atinfo: AttrInfo;
+           scr: Screen;
+           terminfo: TermPtr;
+        END;
+
+VAR Done: BOOLEAN;
+
+PROCEDURE OpenTerminfo(VAR tinfo: Terminfo; termtype: TermType);
+
+(* operations on devices *)
+
+PROCEDURE OpenDevice(VAR dev: Device; devin, devout: FILE;
+		     tinfo: Terminfo);
+
+PROCEDURE OpenDeviceFile(VAR dev: Device; devname: ARRAY OF CHAR;
+                         tinfo: Terminfo);
+
+PROCEDURE Redraw(dev: Device);
+
+PROCEDURE DeviceChar(dev: Device; line, column: CARDINAL) : CHAR;
+
+PROCEDURE CloseDevice(VAR dev: Device);
+
+PROCEDURE SuspendDevice(dev: Device);
+
+PROCEDURE RestoreDevice(dev: Device);
+
+(* operations on windows *)
+
+PROCEDURE CreateWindow(VAR win: Window; dev: Device);
+
+PROCEDURE CloseWindow(VAR win: Window);
+
+PROCEDURE GetWindowAttributes(win: Window; VAR atset: WindowAtSet);
+
+PROCEDURE SetWindowAttributes(win: Window; atset: WindowAtSet);
+
+PROCEDURE NewWindow(VAR win: Window; newwinof: Window;
+                    sx, sy, lns, cols: CARDINAL);
+
+PROCEDURE SubWindow(VAR win: Window; subwinof: Window;
+                    sx, sy, lns, cols: CARDINAL);
+
+PROCEDURE GetWindowSize(win: Window; VAR lines, columns: CARDINAL);
+
+PROCEDURE GetWindowStart(win: Window; VAR line, column: CARDINAL);
+
+PROCEDURE GetSupWin(win: Window; VAR supwin: Window);
+
+PROCEDURE IsSubWin(win: Window): BOOLEAN;
+
+PROCEDURE WindowStat(win: Window; VAR statbuf: WindowStatbuf);
+
+PROCEDURE SetWindowPos(win: Window; line, column: CARDINAL);
+
+PROCEDURE GetWindowPos(win: Window; VAR line, column: CARDINAL);
+
+(* input/output on windows *)
+
+PROCEDURE WindowWrite(win: Window; ch: CHAR);
+
+PROCEDURE SetWindowDisplayMode(win: Window; atset: AttributeSet);
+
+PROCEDURE WindowRead(win: Window; VAR ch: CHAR);
+
+PROCEDURE IsFunctionKey(ch: CHAR) : BOOLEAN;
+
+PROCEDURE ToFunctionKey(ch: CHAR) : FunctionKey;
+
+PROCEDURE WindowChar(win: Window; line, column: CARDINAL) : CHAR;
+
+PROCEDURE WindowUnget(win: Window; ch: CHAR);
+
+PROCEDURE WindowClear(win: Window);
+
+PROCEDURE ScrollWindow(win: Window; count: INTEGER);
+
+PROCEDURE FlushWindow(win: Window);
+
+(* coroutine-manager *)
+
+PROCEDURE StartWinProcess(win: Window; process: PROC);
+
+PROCEDURE TerminateWinProcess(win: Window);
+
+PROCEDURE RunProcesses;
+
+PROCEDURE Terminate;
+.fi
+.SH DESCRIPTION
+The basic objects of this module are windows.
+Each window is associated with a screen part on a terminal device.
+Each terminal device has a terminal type (e.g. "vt100").
+.I Windows
+accesses the terminal capability database terminfo(4)
+and works for each terminal type described there.
+.PP
+Descriptions of terminal capabilities are referenced by
+.I Terminfo
+and can be opened using
+.I OpenTerminfo.
+If an empty string is given to
+.I termtype
+the environment variable
+.B TERM
+is taken instead.
+.PP
+In the beginning at least one device should be opened using
+.I OpenDevice
+or
+.I OpenDeviceFile.
+The given filepointers (typically
+.I StdIO.stdin
+and
+.IR StdIO.stdout )
+must be associated with a terminal device.
+.I devout
+should be buffered.
+.I tinfo
+references the terminal type.
+Resulting parameter is
+.I dev
+which references the terminal device on further operations.
+.I CloseDevice
+restores the terminal settings (ioctl(2)),
+closes the associated filepointers, and deallocates the space
+used for
+.I dev.
+.I Redraw
+restores the screen contents.
+This is necessary if external effects have modified the terminal screen.
+.I DeviceChar
+returns the character at position
+.I line/column
+on device
+.I dev.
+The access of
+.I Windows
+to a device can be suspended by calling
+.I SuspendDevice
+(e.g. for shell escapes).
+This includes terminal resetting (ioctl(2))
+and cursor positioning to the last line.
+.I RestoreDevice
+ends the suspension and redraws the screen.
+.PP
+Each window (except subwindows) has its own screen contents
+and cursor position
+which can differ from the actual contents on the terminal device.
+So write operations and cursor movements affect on default
+the window contents only.
+To update the screen part of a window on the terminal device
+.I FlushWindow
+is needed.
+Because windows may overlap
+it is possible to hide parts
+of a window by flushing
+another window.
+Some attributes belong to a window
+which can be read and set using
+.I GetWindowAttributes
+and
+.I SetWindowAttributes.
+They have following meaning:
+.IP "\fBflushalways\fP" 15
+causes every write operation to be followed by
+.I FlushWindow.
+.IP "\fBflushoninput\fP"
+requests
+.I WindowRead
+to call
+FlushWindow
+before reading.
+.IP "\fBnodelay\fP"
+causes
+.I WindowRead
+to return with
+.I Done
+set to
+.B FALSE
+if no input is available.
+.IP "\fBecho\fP"
+causes
+.I WindowRead
+to echo the input being read.
+.IP "\fBscroll\fP"
+enables scrolling on writing of \fBASCII.nl\fP in the last line
+or after writing in the last column of the last line (automatic margin).
+.IP "\fBmovecursor\fP"
+requests
+.I FlushWindow
+to position the cursor on the terminal device
+accordingly to the window cursor.
+If supported by the terminal
+the cursor is visible only if \fImovecursor\fP is set.
+.IP "\fBfunckeys\fP"
+enables function keys on reading.
+Because this is local to a window typeahead of
+function keys should be avoided.
+.IP "\fBtimeout\fP"
+is to be set in conjunction with \fIfunckeys\fP
+and causes \fIWindowRead\fP not to hang on unfinished
+function key codes.
+.IP "\fBmapkeys\fP"
+requests even single character function key codes to be mapped
+(e.g. the ASCII \fIbs\fP character is mapped to \fIbackspace\fP).
+.IP "\fBreadcr\fP"
+requests
+.I WindowRead
+not to map \fBASCII.cr\fP to \fBASCII.nl\fP.
+.PP
+The first window of a device
+.I dev
+is to be created using
+.I CreateWindow.
+The number of lines and columns result from
+the associated terminal type and can be retrieved using
+.I GetWindowSize.
+.PP
+Further windows can be created using
+.I SubWindow
+and
+.I NewWindow.
+They are positioned relative (with offsets
+.I sx
+(line offset) and
+.IR sy)
+to
+.I subwinof
+or
+.I newwinof,
+respectively, and have a size
+.RI ( lns
+and
+.IR cols )
+which must fit into
+.I subwinof
+or
+.I newwinof,
+respectively.
+The window attributes of
+.I subwinof
+or
+.I newwinof,
+respectively,
+are inherited to
+.I win.
+Subwindows have no screen contents of their own
+but serve as mapping rule and update unit.
+Like other windows they have their own cursor and their own attributes.
+The
+.I flushoninput
+attribute has a special meaning for subwindows
+and causes
+.I subwinof
+to be updated on reading, too.
+Windows created by
+.I NewWin
+behave like windows created by
+.I CreateWindow,
+i.e. if more than one screen fitting window is needed,
+.I CreateWindow
+can be called again.
+.PP
+Some procedures retrieve informations about windows.
+.I GetWindowSize
+returns the number of lines and columns.
+.I GetWindowStart
+returns the relative offset to the terminal screen
+in case of windows created by
+.I NewWindow
+or
+.I CreateWindow
+or the relative offset to
+.I subwinof
+in case of subwindows.
+.I GetSupWin
+returns the super-window, i.e.
+.I subwinof
+of subwindows.
+.I IsSubWin
+allows to distinguish
+between subwindows and other windows.
+.I WindowStat
+returns a record containing further informations associated with
+.I win.
+The components of the record are system dependant,
+e.g. \fIterminfo\fP is possibly a \fItermcap\fP reference
+on Berkeley systems.
+.PP
+Cursor positioning is possible using
+.I SetWindowPos.
+Line and column numbers start from 0.
+.I GetWindowPos
+returns the current cursor position.
+.PP
+.I WindowWrite
+writes
+.I ch
+at the current cursor position of the window.
+Besides visible characters only few characters are permitted.
+Back spaces, newlines, and carriage returns are translated
+into cursor movements,
+i.e. back spaces don't erase the window.
+Visible characters cause the cursor to be moved
+(with an automatic margin at the end of each window line).
+If \fIscroll\fP is not set,
+no scrolling takes place
+after having reached the end of the last line of the window
+and nothing can be written without
+moving the cursor first.
+.I WindowClear
+fills
+.I win
+with blanks.
+.I ScrollWindow
+scrolls 
+.I win
+upward (\fIcount\fP > 0) or
+downward (\fIcount\fP < 0)
+\fBABS\fP(\fIcount\fP) lines.
+.PP
+.I SetWindowDisplayMode
+sets the set of display modes for
+.I win.
+The type
+.I AttributeSet
+is to be imported from
+.I Attributes.
+The display mode is effective for
+the given window until
+.I SetWindowDisplayMode
+is called again.
+Unlike window attributes, display modes are not inherited
+to subwindows.
+Combinations of several display modes (cardinality of
+.IR "atset > 1" )
+do not work well for every terminal.
+Terminals needing extra characters to store the display modes
+are not supported.
+Note that
+.I WindowClear
+does not affect the display modes;
+e.g. reverse display mode followed by
+.I WindowClear
+causes the complete window to be set into reverse video.
+.PP
+.I WindowRead
+reads one character into
+.I ch
+from the terminal associated with
+.I win.
+If
+.I flushoninput
+is set
+.I FlushWindow
+is called for
+.I win,
+or if
+.I win
+is a subwindow for the window ordered above.
+If the cursor on the terminal is to be left at the window cursor position
+(and is to be made more visible if possible)
+.I movecursor
+should be set together with
+.I flushoninput.
+On
+.I nodelay
+.I WindowRead
+returns immediately if no input is available.
+Characters being read are written to
+the current cursor position if
+.I echo
+is set.
+If function keys are enabled
+.I IsFunctionKey
+can be used to distinguish between normal
+characters and function keys.
+.I ToFunctionKey
+converts a character returned by
+.I WindowRead
+to a function key (type \fIFunctionKey\fP is imported
+from module \fIFunctionKeys\fP).
+.I ToFunctionKey
+returns
+.I nokey
+if
+.I ch
+is not a function key.
+Function keys are not echoed and cannot be given as argument
+to
+.I WindowWrite.
+.I WindowUnget
+causes
+.I WindowRead
+to return
+.I ch
+on next call for this window.
+.PP
+.I WindowChar
+returns the character at the given window position.
+.PP
+.I FlushWindow
+updates
+.I win
+on the associated terminal device in an optimized way.
+If
+.I movecursor
+is set for
+.I win
+the (visible) cursor on the terminal
+is left at the corresponding window cursor position.
+Else the cursor is invisible (if possible).
+.PP
+The coroutine-manager allows to serve more than one terminal
+concurrently.
+.I StartWinProcess
+connects a coroutine procedure
+.I proc
+to
+.I win.
+Coroutine procedures must not share a window nor a terminal device.
+After having set up all coroutine procedures with
+.I StartWinProcess
+.I RunProcesses
+transfers to the first of them.
+The only way that a coroutine gets suspended is to call
+.I WindowRead
+with
+.I nodelay
+set.
+.I WindowRead
+then transfers to the next coroutine if no input is available.
+A coroutine must not return but has to call
+.I Terminate
+for final suspension.
+.I TerminateWinProcess
+allows to kill other coroutines.
+If all coroutines are terminated
+.I RunProcesses
+returns.
+The stack for each coroutine is limited (currently 32768 bytes),
+so big arrays should be allocated using
+.I Storage
+and not as local variables.
+The compile flag "-0c" must be given at linkage time to
+.I m2c
+if coroutine-managing routines are used from
+.I Windows.
+.SH "SEE ALSO"
+MainWin(3MOD), FtdWin(3MOD), W(3MOD),
+Menus(3MOD), Screen(3MOD), Attributes(3MOD),
+FunctionKeys(3MOD), TermInfo(3MOD)
+.SH BUGS
+.I Windows
+is very slow if
+.I devout
+is unbuffered.
+So
+.I OpenDeviceFile
+should be used instead of
+.I OpenDevice.
+.PP
+No character will be written at the last column of the last line
+of a device.
+This is necessary because some terminals scroll in this case
+one line forward.

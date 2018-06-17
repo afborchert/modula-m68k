@@ -1,0 +1,103 @@
+.TH InOut 3MOD "local:Borchert"
+.SH NAME
+InOut, Read, ReadString, ReadCard, ReadInt, Write, WriteLn, WriteString,
+WriteInt, WriteCard, WriteOct, WriteHex \- formatted i/o
+.SH SYNOPSIS
+.DS
+CONST EOL = 12C;
+
+VAR Done: BOOLEAN;
+.sp 0.8v
+VAR termCH: CHAR;
+
+PROCEDURE Read(VAR ch: CHAR);
+.sp 0.8v
+PROCEDURE ReadString(VAR s: ARRAY OF CHAR);
+.sp 0.8v
+PROCEDURE ReadCard(VAR c: CARDINAL);
+.sp 0.8v
+PROCEDURE ReadInt(VAR i: INTEGER);
+
+PROCEDURE Write(ch: CHAR);
+.sp 0.8v
+PROCEDURE WriteLn;
+.sp 0.8v
+PROCEDURE WriteString(s: ARRAY OF CHAR);
+.sp 0.8v
+PROCEDURE WriteInt(x: INTEGER; n: CARDINAL);
+.sp 0.8v
+PROCEDURE WriteCard(x: CARDINAL; n: CARDINAL);
+.sp 0.8v
+PROCEDURE WriteOct(x: CARDINAL; n: CARDINAL);
+.sp 0.8v
+PROCEDURE WriteHex(x: CARDINAL; n: CARDINAL);
+.DE
+.SH DESCRIPTION
+.I InOut
+bases on the
+.I Terminal
+module and writes to
+.I stdout
+and reads from
+.IR stdin .
+.PP
+.I Read
+reads a character and stores it in
+.IR ch .
+.PP
+.I ReadString
+reads a sequence of characters not containing blanks nor
+control characters.
+Leading blanks are ignored.
+The terminating character is assigned to
+.IR termCH .
+.PP
+.I ReadCard/ReadInt
+read a string and convert it to
+cardinal/integer.
+Leading blanks are ignored.
+The terminating character is assigned to
+.IR termCH .
+.PP
+.I Write
+writes
+.I ch
+to
+.IR stdout .
+.PP
+.I WriteLn
+is equivalent to
+\fIWrite\fP(\fIEOL\fP).
+.PP
+.I WriteString
+writes
+.I s
+to
+.IR stdout .
+.PP
+.I WriteInt/WriteCard
+write integer/cardinal
+.I x
+with at least
+.I n
+characters on
+.IR stdout .
+If
+.I n
+is greater than the number of digits needed,
+blanks are added preceding the number.
+.PP
+.I WriteOct
+and
+.I WriteHex
+write a cardinal number in
+octal/hexadecimal format.
+.SH DIAGNOSTICS
+.I Done
+is
+.B TRUE
+on successful calls,
+otherwise
+.BR FALSE .
+.SH "SEE ALSO"
+StdIO(3MOD), FtdIO(3MOD)

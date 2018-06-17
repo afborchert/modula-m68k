@@ -1,0 +1,79 @@
+.TH MPROF 1 "local:Borchert"
+.SH NAME
+mprof \- display profile data for Modula-2 programs
+.SH SYNOPSIS
+.B mprof
+[-t] [-c] [-n] [-h] [ file [ monitor-file ] ]
+.SH DESCRIPTION
+.I Mprof
+interprets the file
+.I mon.out
+produced by the \fIMonitor\fP(3MOD)
+subroutine.
+The symbol tables in the
+named object file (\fIa.out\fP default)
+and in the corresponding reference files
+are read and correlated with the
+.I mon.out
+profile file.
+For each procedure, the percentage
+of time spent executing
+this routine is printed,
+together with the number of times that routine was called
+and the number of milliseconds per call.
+.PP
+In order for the number of calls to a routine to be tallied,
+the
+.B \-p
+option of
+.I m2c(1)
+must have been given when the file containing the
+procedure was compiled.
+This option also arranges the
+.I mon.out
+file to be produced automatically.
+.PP
+The mutually exclusive options \fBt, c,\fP and \fBn\fP
+determine the type for sorting of the output lines
+(no sorting by default):
+.TP 8
+.B \-t
+Sort by decreasing percentage of total time.
+.TP
+.SM
+.B \-c
+Sort by decreasing number of calls.
+.TP
+.SM
+.B \-n
+Sort lexically by module and procedure name.
+.PP
+The \fBh\fP option causes the heading normally printed to be suppressed.
+(This is useful if the report is to be processed further.)
+.SH ENVIRONMENT
+.TP 5
+.B "MODPATH"
+\c
+.I MODPATH
+specifies a list of directories separated by colons.
+This path is used for the search of reference file archives named
+.I REF.
+.TP 5
+.B "SRCPATH"
+\c
+This path is used on the search of reference files.
+.SH FILES
+.ta \w'/u/lib/modula/REF  'u
+mon.out	for profile
+.br
+a.out		for namelist
+.br
+*.r	reference files
+.br
+REF	archive with reference files
+.br
+/u/lib/modula/REF	archive with std reference files
+.SH "SEE ALSO"
+Monitor(3MOD), profil(2), m2c(1)
+.SH BUGS
+Beware of quantization errors.

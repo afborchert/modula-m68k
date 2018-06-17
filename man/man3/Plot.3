@@ -1,0 +1,61 @@
+.TH Plot 3MOD "local:Borchert"
+.SH NAME
+Plot, OpenPlot, ClosePlot, Move, Cont, Point, Line, String, Arc,
+Circle, Erase, LineMod, Space, Reverse, Polygon, CharMod \- graphics interface
+.SH SYNOPSIS
+.DS
+FROM StdIO IMPORT FILE;
+
+PROCEDURE OpenPlot(f: FILE);
+
+PROCEDURE ClosePlot;
+
+PROCEDURE Move(xto, yto: INTEGER);
+
+PROCEDURE Cont(xto, yto: INTEGER);
+
+PROCEDURE Point(xpoint, ypoint: INTEGER);
+
+PROCEDURE Line(xfrom, yfrom, xto, yto: INTEGER);
+
+PROCEDURE String(str: ARRAY OF CHAR);
+
+PROCEDURE Arc(xcenter, ycenter, xstart, ystart,
+              xend, yend: INTEGER);
+
+PROCEDURE Circle(xcenter, ycenter, radius: INTEGER);
+
+PROCEDURE Erase;
+
+PROCEDURE LineMod(style: ARRAY OF CHAR);
+
+PROCEDURE Space(xupleft, yupleft,
+                xlowright, ylowright: INTEGER);
+
+PROCEDURE Reverse(xupleft, yupleft,
+                  xlowright, ylowright: INTEGER);
+
+PROCEDURE Polygon(xcenter, ycenter,
+                  xstart, ystart, edges: INTEGER);
+
+PROCEDURE CharMod(plotchar: CHAR);
+.DE
+.SH DESCRIPTION
+These subroutines generate graphic output in a relatively
+device-independent manner.
+See plot(5) for a description of their effect.
+.I OpenPlot
+must be used before any of the others to open the device for
+writing.
+.I ClosePlot
+flushes the output.
+.SH DIAGNOSTICS
+.I Plot
+prints `Plot: value out of bounds' and aborts
+if
+\fBBS\fP(\fIarg\fP)
+is greater than 77777B for a given
+parameter
+.IR arg .
+.SH "SEE ALSO"
+plot(5), plot(1)

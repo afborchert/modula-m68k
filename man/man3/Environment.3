@@ -1,0 +1,42 @@
+.TH Environ 3MOD "local:Borchert"
+.SH NAME
+Environment, GetEnv, EnvPar \- get environment parameters
+.SH SYNOPSIS
+.DS
+PROCEDURE GetEnv(name: ARRAY OF CHAR;
+                 VAR text: ARRAY OF CHAR;
+                 VAR ok: BOOLEAN);
+
+PROCEDURE EnvPar(index: CARDINAL;
+                 VAR text: ARRAY OF CHAR;
+                 VAR ok: BOOLEAN);
+.DE
+.SH DESCRIPTION
+.I GetEnv
+searches for the environment parameter
+specified by
+.I name
+and stores its contents in
+.IR text .
+If
+.I name
+cannot be found
+.I ok
+gets
+.BR FALSE .
+.PP
+.I EnvPar
+returns the
+.I index-th
+(starting with 0)
+parameter in
+.IR text ,
+viz. "name=value".
+If
+.I index
+is out of range
+.I ok
+gets
+.BR FALSE .
+.SH "SEE ALSO"
+environ(5)

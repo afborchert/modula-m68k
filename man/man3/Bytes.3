@@ -1,0 +1,37 @@
+.TH Bytes 3MOD "local:Stanglow"
+.SH NAME
+Bytes, ByteNCopy, PINC, PDEC \- byte and pointer manipulations
+.SH SYNOPSIS
+.DS
+PROCEDURE ByteNCopy(to, from : ADDRESS; no : CARDINAL);
+
+PROCEDURE PINC(VAR ptr : ADDRESS; no : CARDINAL);
+
+PROCEDURE PDEC(VAR ptr : ADDRESS; no : CARDINAL);
+.DE
+.SH DESCRIPTION
+.I ByteNCopy
+copies
+.I no
+bytes
+in an optimized way
+from address
+.I from
+to
+address
+.I to.
+.LP
+.I PINC
+and
+.I PDEC
+increment
+respectively
+decrement
+.I ptr
+(potentially a
+pointer variable)
+by the number
+of bytes
+specified
+as
+.IR no .

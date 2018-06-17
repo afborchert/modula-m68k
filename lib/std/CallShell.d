@@ -1,0 +1,5 @@
+DEFINITION MODULE CallShell;
+
+   PROCEDURE Shell(cmd: ARRAY OF CHAR; VAR status: CARDINAL) : BOOLEAN;
+
+END CallShell.

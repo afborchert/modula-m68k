@@ -1,0 +1,5 @@
+Errors =        { Error } .
+Error =         LineNumber Position ErrorNumber .
+LineNumber =    ShortNumber .
+Position =      ShortNumber .
+ErrorNumber =   ShortNumber .

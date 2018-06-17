@@ -1,0 +1,27 @@
+.TH SysPerror 3MOD "local:Borchert"
+.SH NAME
+SysPerror \- system error messages
+.SH SYNOPSIS
+.nf
+PROCEDURE Perror(str: ARRAY OF CHAR);
+
+PROCEDURE GetErrorString(errno: CARDINAL; VAR str: ARRAY OF CHAR);
+.fi
+.SH DESCRIPTION
+.I Perror
+prints the most recent system error
+in a readable form onto
+.IR StdIO.stderr .
+The error message is preceded by
+.I str
+and a colon.
+The system error code is taken from
+.I Errno.errno
+and set by various system modules.
+.I GetErrorString
+returns the error message associated with
+.I errno
+in
+.IR str .
+.SH "SEE ALSO"
+StdIO(3MOD), Errno(3MOD)

@@ -1,0 +1,214 @@
+.ds iN "\f2i1\fP\ \&.\&. \f2i8\fP
+.ie t .ds St "\v'.3m'\s+3*\s-3\v'-.3m'
+.el .ds St *
+.de cC
+.IP "\f3\\$1\fP"
+..
+.TH W 3MOD "local:Stanglow"
+.SH NAME
+W, printf0, printf1, printf2, printf3, printf4, printf5, printf6, printf7, printf8, append0, append1, append2, append3, append4, append5, append6, append7, append8, done, success, setmode, getmode \- formatted output to windows
+.SH SYNOPSIS
+.DS
+(* diagnostic *)
+
+PROCEDURE done () : BOOLEAN;
+
+PROCEDURE success() : FmtExitCode;
+
+(* error handling *)
+
+PROCEDURE setmode (mode : BITSET);
+
+PROCEDURE getmode (VAR mode : BITSET);
+
+(* output *)
+
+PROCEDURE printf0 (win : Window; line, col : CARDINAL;
+   fmt : ARRAY OF CHAR);
+
+PROCEDURE printf1 (win : Window; line, col : CARDINAL;
+   fmt : ARRAY OF CHAR; i1 : ARRAY OF BYTE);
+
+PROCEDURE printf2 (win : Window; line, col : CARDINAL;
+   fmt : ARRAY OF CHAR; i1,i2 : ARRAY OF BYTE);
+
+(* ... *)
+
+PROCEDURE printf8 (win : Window; line, col : CARDINAL;
+   fmt : ARRAY OF CHAR; i1,i2, i3, i4, i5, i6, i7, i8 :
+   ARRAY OF BYTE);
+
+PROCEDURE append0 (win : Window; fmt : ARRAY OF CHAR);
+
+PROCEDURE append1 (win : Window; fmt : ARRAY OF CHAR;
+   i1 : ARRAY OF BYTE);
+
+PROCEDURE append2 (win : Window; fmt : ARRAY OF CHAR;
+    i1,i2 : ARRAY OF BYTE);
+
+(* ... *)
+
+PROCEDURE append8 (win : Window; fmt : ARRAY OF CHAR;
+    i1,i2, i3, i4, i5, i6, i7, i8 : ARRAY OF BYTE);
+.DE
+.SH DESCRIPTION
+.I printf0
+\&..\&
+.I printf8
+and
+.I append0
+\&..\&
+.I append8
+convert their parameters \*(iN,
+instantiate them into the format string
+.I fmt
+and write the resulting text into
+window
+.I win \&.
+Refer to
+.IR Printf (3MOD)
+for a detailed description of formatting
+capabilities.
+.LP
+.I printf0
+\&..\&
+.I printf8
+always write the first output character to 
+the window position given by
+.RI ( line , col ),
+.I append0
+\&..\&
+.I append8
+append the output to the current
+window position
+yield by
+.IR Windows . GetWindowPos .
+Output is restricted to those
+characters,
+.IR Windows . WindowWrite
+would accept.
+The rules concerning
+interpretation of newlines or carriage returns
+apply accordingly.
+.LP
+.I printf0
+\&..\&
+.I printf8
+uses auto margin
+and scrolling 
+capabilities
+if
+.B scroll
+is a current window attribute of
+.IR win .
+Otherwise
+output must not exceed last column or last line
+of the window.
+No such restriction exists for
+.I append0
+\&..\&
+.IR append8 ,
+which will always use auto margin
+and
+scrolling mechanisms.
+.LP
+All procedures will flush
+.I win
+at most one
+time.
+Flushing is performed
+if and only if
+.B flushalways
+is in the current attribute set
+of
+.IR win .
+.LP
+.I done
+returns
+.B TRUE
+is the last output procedure call
+was successful,
+more detailed information
+can be obtained
+by
+.I success
+.RI (FmtExitCode
+is imported from
+.IR Printf).
+.LP
+.I setmode
+defines a new error handling mode
+.I mode
+which is by default
+set to
+.IR Printf . Default.
+.I getmode
+yields the current mode.
+.SH DIAGNOSTICS
+Diagnostic is unnecessary
+unless default
+error handling strategy has been explicitly
+modified
+by prior calls
+of
+.IR setmode \&.
+See
+.IR Printf (3MOD)
+for more details.
+.LP
+Some problems arise on the output
+of error messages if
+.IR StdIO . stderr
+is associated
+with the same device
+than
+.IR win .
+.IR E . EnterInitProc
+and
+.IR E . EnterExitProc
+provide a suitable
+feature to
+suspend and restore device
+by means of
+.IR Windows . SuspendDevice
+and
+.IR Windows . RestoreDevice .
+.LP
+Be careful of devices not reset
+on program termination in connection with
+errors on window operations.
+.LP
+Besides illegal format strings
+the following errors might occur
+using
+.IR W:
+.B IllegalWindowOffset ,
+.B WindowTooSmall
+(resulting from illegal arguments to
+.I printf0
+\&..\&
+.IR printf8 ),
+.B CannotFlushWindow
+(failure of
+.IR Windows . FlushWindow ) ,
+.B CannotWriteWindow
+(illegal output character)
+.B CannotAccessWindow
+(other errors) .
+.LP
+Error messages issued by
+.I W
+contain information
+about the their reason
+and the affected procedure:
+.IP
+.DS
+[fatal] W.printf1(...,30,0,"%u",...);
+        Illegal parameter values: offset out of window.
+[a.out] Exit code 206. Stop.
+.DE
+.LP
+.SH "SEE ALSO"
+.IR Printf (3MOD),
+.IR Windows (3MOD),
+.IR E (3MOD)

@@ -1,0 +1,3 @@
+DEFINITION MODULE StdFuncs;
+
+END StdFuncs.

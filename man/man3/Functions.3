@@ -1,0 +1,181 @@
+.TH Functions 3MOD "local:Borchert"
+.SH NAME
+Functions \- definition and evaluation of functions
+.SH SYNOPSIS
+.nf
+TYPE Function;
+TYPE Real = REAL;
+TYPE StdFunc1 = PROCEDURE (Real) : Real;
+TYPE StdFunc2 = PROCEDURE (Real, Real) : Real;
+
+VAR errpos: CARDINAL; (* error position in expr of ParseFunction *)
+
+PROCEDURE InstallStdFunc1(funcname: ARRAY OF CHAR;
+                          stdfunc: StdFunc1);
+
+PROCEDURE InstallStdFunc2(funcname: ARRAY OF CHAR;
+                          stdfunc: StdFunc2);
+
+PROCEDURE InstallStdConst(constname: ARRAY OF CHAR;
+                          constval: Real);
+
+PROCEDURE ParseFunction(expr: ARRAY OF CHAR;
+                        VAR func: Function) : BOOLEAN;
+
+PROCEDURE FirstParam(func: Function);
+
+PROCEDURE NextParam(func: Function;
+                    VAR parname: ARRAY OF CHAR) : BOOLEAN;
+
+PROCEDURE SetFuncParam(func: Function; parname: ARRAY OF CHAR;
+                       value: Real);
+
+PROCEDURE EvalFunction(func: Function) : Real;
+
+PROCEDURE DisposeFunction(VAR func: Function);
+.fi
+.SH DESCRIPTION
+This module allows to define and evaluate real-valued functions at runtime.
+A function is defined by an expression whose grammar is Modula-2 oriented
+with following exceptions:
+.IP (1)
+The \fB?:\fP operator has been added (semantic close to C).
+\fB?:\fP has lowest priority and right-to-left associativity.
+.IP (2)
+Integer constants are real constants, too.
+.IP (3)
+Operator-keywords are not supported, so use
+.TS
+l lfB l.
+	&	instead of \fBAND\fP
+	|	instead of \fBOR\fP, and
+	~	instead of \fBNOT\fP.
+.TE
+.IP (4)
+\fBTRUE\fP is represented as 1.0 and \fBFALSE\fP as 0.0.
+Anything but 0.0 is taken to be \fBTRUE\fP in conditions.
+.LP
+.IP "\fBThe grammar in EBNF:\fP"
+.TS
+l l.
+\fH
+CondExpression =	Expression
+	[ "?" CondExpression ":" CondExpression ] .
+Expression =	SimpleExpression
+	[ RelOp SimpleExpression ] .
+SimpleExpression =	["+"|"-"] Term { AddOp Term } .
+Term =	Factor { MulOp Factor } .
+Factor =	Constant | IDENT | FunctionCall |
+	"~" Factor | "(" CondExpression ")" .
+FunctionCall =	IDENT "(" CondExpression
+	[ "," CondExpression ] ")" .
+RelOp =	"=" | "#" | "<" | ">" | "<=" | ">=" .
+AddOp =	"+" | "-" | "|" .
+MulOp =	"*" | "/" | "&" .
+.TE
+.LP
+The start symbol is \fHCondExpression\fP.
+Identifiers are sequences of letters and digits.
+The first character must be a letter.
+.LP
+.IP "\fBSyntax of constants:\fP
+\fHDigit { Digit } [ "." { Digit } ] [ ("E"|"e") Digit { Digit } ]\fP
+.LP
+.I ParseFunction
+parses
+.I expr
+and returns the function in
+.I func
+for further referencing.
+On errors
+.I ParseFunction
+returns
+.B FALSE
+after
+.I errpos
+has been set to the error position.
+Errors can result from
+.IP (1)
+Syntax errors.
+.IP (2)
+Bad constants, e.g. exponent is too large.
+.IP (3)
+Bad number of arguments to a function.
+.LP
+Each identifier not declared as a constant or a function
+(using \fIInstallStdFunc1\fP, \fIInstallStdFunc2\fP, or
+\fIInstallStdConst\fP)
+is considered to be a parameter.
+The value of a parameter is predefined to 0.0.
+.I FirstParam
+and
+.I NextParam
+give the parameter names in alphabetical order.
+Parameter values can be changed using
+.IR SetFuncParam .
+.I EvalFunction
+evaluates the function with the parameters set previously.
+.I EvalFunction
+does not check for division by zero or any other operations
+which can result in a floating point exception.
+.LP
+.I DisposeFunction
+releases the storage associated with
+.IR func .
+.LP
+To get a standard set of functions and constants
+.I StdFuncs
+should be imported.
+.SH EXAMPLE
+.nf
+VAR
+   functxt, parname: ARRAY [0..63] OF CHAR;
+   func: Function;
+   val: Real;
+
+(* ... *)
+WriteString("func: "); ReadString(functxt);
+IF ParseFunction(func, functxt) THEN
+   FirstParam;
+   WHILE NextParam(func, parname) DO
+      WriteString(parname); WriteString(" = ");
+      ReadReal(val);
+      SetFuncParam(func, parname, val);
+   END;
+   WriteReal(EvalFunction(func), 1); WriteLn;
+ELSE
+   (* error at errpos *)
+END;
+.fi
+.LP
+Instead of reading real values
+it is possible to read parameters as strings and to parse
+and evaluate them.
+This enables the user to give standard constants and expressions
+as parameter values (e.g. pi/2).
+.SH DIAGNOSTICS
+.I ParseFunction
+returns
+.B FALSE
+on syntax errors.
+The error position is stored in
+.IR errpos .
+.SH "SEE ALSO"
+StdFuncs(3MOD)
+.SH BUGS
+There is no good solution to handle floating point exceptions
+during the evaluation of functions.
+The only way to detect \fIall\fP exceptions is to catch the signal SIGFPE.
+But a signal catching routine of \fBSIGFPE\fP must not return
+else this would result in an infinite loop.
+The same problem occures if
+.B SIGFPE
+is ignored.
+.PP
+The only way to let functions call functions
+is to introduce standard functions via
+.I InstallStdFunc1
+or
+.I InstallStdFunc2
+which call
+.I EvalFunction.

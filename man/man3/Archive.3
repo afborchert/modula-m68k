@@ -1,0 +1,91 @@
+.TH Archive 3MOD "local:Borchert"
+.SH NAME
+Archive, AFILE, AStat, ArchiveOpen, ArchiveReopen, ArchiveClose,
+ArchiveRead, ArchiveStat \- reading archive files
+.SH SYNOPSIS
+.DS
+FROM SystemTypes IMPORT TIME, OFF;
+
+CONST NameLength = 14;
+
+TYPE AFILE;
+
+TYPE FileName = ARRAY[0..NameLength-1] OF CHAR;
+
+TYPE AStat =
+      RECORD
+         name: FileName;
+         uid, gid: CARDINAL;
+         date: TIME;
+         size: OFF;
+         mode: BITSET;
+      END;
+
+PROCEDURE ArchiveOpen(VAR a: AFILE; archive: ARRAY OF CHAR;
+                      filename: ARRAY OF CHAR) : BOOLEAN;
+
+PROCEDURE ArchiveReopen(a: AFILE;
+                        filename: ARRAY OF CHAR) : BOOLEAN;
+
+PROCEDURE ArchiveClose(a: AFILE);
+
+PROCEDURE ArchiveRead(a: AFILE; VAR ch: CHAR) : BOOLEAN;
+
+PROCEDURE ArchiveStat(a: AFILE; VAR buf: AStat);
+.DE
+.SH DESCRIPTION
+.I ArchiveOpen
+opens the file
+.I filename
+archived in the archive
+.I archive
+for reading.
+.I A
+identifies the stream in subsequent operations.
+.PP
+.I ArchiveReopen
+searches for the file
+.I filename
+in the archive of
+.IR a .
+.PP
+.I ArchiveClose
+closes the opened stream
+.IR a .
+.PP
+.I ArchiveRead
+stores a single character of the stream
+.I a
+into
+.I ch
+and returns
+.B FALSE
+on end of file.
+.PP
+.I ArchiveStat
+stores the status information of the archive file referenced by
+.I a
+into the status buffer
+.IR buf .
+.SH DIAGNOSTICS
+.I ArchiveOpen
+returns
+.B FALSE
+if the archive file cannot be opened for reading,
+if
+.I archive
+isn't a archive file,
+or if
+.I filename
+cannot be found in
+.IR archive .
+.I ArchiveReopen
+returns
+.B FALSE
+if
+.I filename
+cannot be found.
+.SH "SEE ALSO"
+ar(1), ar(5)       more about archives
+.br
+SystemTyp(3MOD)    module SystemTypes

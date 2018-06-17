@@ -1,0 +1,61 @@
+.TH Terminal 3MOD "local:Borchert"
+.SH NAME
+Terminal, Read, ReadAgain, Write, WriteLn, WriteString \- simple i/o
+.SH SYNOPSIS
+.DS
+VAR Done: BOOLEAN;
+
+PROCEDURE Read(VAR ch: CHAR);
+
+PROCEDURE ReadAgain;
+
+PROCEDURE Write(ch: CHAR);
+
+PROCEDURE WriteLn;
+
+PROCEDURE WriteString(s: ARRAY OF CHAR);
+.DE
+.SH DESCRIPTION
+.I Terminal
+bases on the
+.I StdIO
+module and reads from
+.I stdin
+and writes to
+.IR stdout .
+.PP
+.I Read
+reads a character and stores it in
+.IR ch .
+.PP
+.I ReadAgain
+causes the last read character to be read again.
+This may be used after calling
+.I ReadCard, ReadInt, ReadString
+from InOut(3MOD) or
+.I ReadReal
+from RealInOut(3MOD)
+for rereading the terminating character.
+.PP
+.I Write
+writes
+.I ch
+to
+.IR stdout .
+.PP
+.I WriteLn
+writes a newline character to
+.IR stdout .
+.PP
+.I WriteString
+writes the string
+.I s
+to stdout.
+.SH DIAGNOSTICS
+.I Done
+is
+.B TRUE
+on successful calls, otherwise
+.BR FALSE .
+.SH "SEE ALSO"
+StdIO(3MOD), InOut(3MOD)

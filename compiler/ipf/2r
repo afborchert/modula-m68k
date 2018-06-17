@@ -1,0 +1,15 @@
+RefFile =       Module .
+Module =        MOD Head Block END .
+Head =          LineNum Name ObjectNum
+LineNum =       ShortNumber .           (* refers to source text *)
+Name =          { Character } '0C'
+ObjectNum =     ShortNumber .
+Block =         { Module | Procedure | Variable } .
+Procedure =     PROC Head ParLength Block END .
+Variable =      VAR LineNum Name VarType AddrMode Address Size .
+VarType =       INT | CARD | CHAR | BOOL | WORD | REAL |
+                ARR | ARRDYN | REC | POINT | SET | SCAL |
+                PROCVAR | HIDE | PROCESS .
+AddrMode =      ABS | IND | REL .
+Address =       ShortNumber .
+Size =          ShortNumber .           (* in bytes *)

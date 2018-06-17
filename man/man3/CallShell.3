@@ -1,0 +1,26 @@
+.TH CallShell 3MOD "local:Borchert"
+.SH NAME
+CallShell, Shell \- issue a shell command
+.SH SYNOPSIS
+.DS
+PROCEDURE Shell(string: ARRAY OF CHAR;
+                VAR status: CARDINAL) : BOOLEAN;
+.DE
+.SH DESCRIPTION
+.I Shell
+causes the
+.I string
+to be given to sh(1) as input as if
+the
+.I string
+had been typed as a command at a terminal.
+The current process waits until the shell has completed,
+the status (see wait(2)) of the shell will be stored in
+.IR status .
+.SH DIAGNOSTICS
+.I Shell
+returns
+.B FALSE
+if sh(1) cannot be started.
+.SH "SEE ALSO"
+sh(1), wait(2)

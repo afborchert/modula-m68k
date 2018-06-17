@@ -1,0 +1,67 @@
+.TH SystemTypes 3MOD "local:Borchert"
+.SH NAME
+SystemTypes \- system types and constants
+.SH SYNOPSIS
+.nf
+CONST
+   DirSize = 14;
+   MaxOpenFiles = 40;
+
+   (* file control options;
+      arguments of SysFcntl(2) and SysOpen(2) *)
+   rdonly = {};
+   wronly = { 31 };
+   rdwr = { 30 };
+   ndelay = { 29 };
+   append = { 28 };
+   creat = { 23 };
+   trunc = { 22 };
+   excl = { 21 };
+TYPE
+   Sig = (SIGRTI, SIGHUP, SIGINT, SIGQUIT, SIGILL,
+          SIGTRAP, SIGIOT, SIGEMT, SIGFPE, SIGKILL,
+          SIGBUS, SIGSEGV, SIGSYS, SIGPIPE,
+          SIGALRM, SIGTERM, SIGUSR1, SIGUSR2,
+          SIGCLD, SIGPWR);
+
+   ProcessId = INTEGER; (* ProcessId may be -1 for kill *)
+   TIME = LONGINT;
+   OFF = LONGINT; (* offset/size of files *)
+.fi
+.SH DESCRIPTION
+This module defines some system dependent constants and types.
+.I DirSize
+defines the maximal file name length (without path).
+.I MaxOpenFiles
+gives the maximal number of open files.
+So possibly valid file descriptors range from 0 to
+.IR MaxOpenFiles-1 .
+The file control flags can be given as argument to
+.I SysOpen
+and
+.IR SysFcntl .
+The signal number type
+.I Sig
+is used by
+.I SysSignal
+and
+.IR SysKill .
+Any signal number beyond
+.I SIGTERM
+is to be considered system dependent.
+.SH FILES
+Constants and types are derived from:
+.br
+/usr/include/fcntl.h
+.br
+/usr/include/signal.h
+.br
+/usr/include/sys/dir.h
+.br
+/usr/include/sys/param.h
+.br
+/usr/include/sys/types.h
+.SH "SEE ALSO"
+Calendar(3MOD), TimeIO(3MOD),
+fcntl(2), open(2), signal(2)
+.SH BUGS

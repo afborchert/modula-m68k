@@ -1,0 +1,527 @@
+.de BT
+.IP "\f3\\$1\fP"
+..
+.de IT
+.IP "\f2\\$1\fP"
+..
+.TH EditWindow 3MOD "local:Stanglow"
+.SH NAME
+EditWindow, LocalMoves, EnableLocalMoves, MapChar, FunctionKeyReaction, DefineReaction, EnableSingleCharFK, ReadOneChar, CallOnce, Wait, Beep, GetWindowLine, Return, Ignore, Default \- window editor
+.SH SYNOPSIS
+.DS
+TYPE 
+   FunctionKeyReaction =
+      PROCEDURE (Window, VAR FunctionKey, VAR BOOLEAN);
+
+CONST 
+   LocalMoves = 
+      FunctionKeySet {up,down,left,right,home,backspace};
+
+(* editing *)
+
+PROCEDURE EditWindow(win : Window; predefined : BOOLEAN;
+   VAR exitkey : FunctionKey );
+
+PROCEDURE EnableLocalMoves (directions : FunctionKeySet);
+
+PROCEDURE MapChar(char : CHAR; key : FunctionKey);
+
+PROCEDURE DefineReaction(key : FunctionKey;
+   reactproc : FunctionKeyReaction);
+
+PROCEDURE EnableSingleCharFK (recognize : BOOLEAN);
+
+PROCEDURE CallOnce(proc : PROC);
+
+(* other useful procedures *)
+
+PROCEDURE ReadOneChar(win : Window; echo : BOOLEAN) : CHAR;
+
+PROCEDURE Wait(w : Window);
+
+PROCEDURE Beep();
+
+PROCEDURE GetWindowLine(win : Window; line : CARDINAL;
+   VAR text : ARRAY OF CHAR;
+   clearleadingspace, clearfillupspace : BOOLEAN);
+
+(* prototype procedures with type 'FunctionKeyReaction' *)
+
+PROCEDURE Ignore (win : Window; VAR exitkey : FunctionKey;
+   VAR return : BOOLEAN);
+
+PROCEDURE Return (win : Window; VAR exitkey : FunctionKey;
+   VAR return : BOOLEAN);
+
+PROCEDURE Default (win : Window; VAR exitkey : FunctionKey;
+   VAR return : BOOLEAN);
+.DE
+.SH DESCRIPTION
+.I EditWindow
+provides a simple screen-oriented editor for
+windows created
+by
+.IR Windows (3MOD).
+The commands supported
+are adapted
+from
+.IR vi (1)
+even it was not intended to realize
+a copy of this tool as a Modula-2 library routine.
+.LP
+Any window
+.I win
+can be edited by
+.I EditWindow 
+and
+no precondition
+concerning current window attributes and current cursor position
+are required.
+Initial
+attribute set and cursor position
+of
+.I win
+are restored after 
+editing.
+.LP
+.I EditWindow
+supports
+three modes:
+.BR escape ,
+.BR insert ,
+and 
+.BR replace.
+Refer to section
+.B EDITING COMMANDS
+for description.
+Editing
+always starts
+at the upper left
+corner of
+.IR win ,
+any typeahead of input
+(before
+.I EditWindow
+was called)
+is ignored.
+If
+.I predefined
+is
+.B TRUE ,
+.I EditWindow
+displays the old contents
+of
+.I win
+and switches to mode
+.BR escape .
+If
+.I predefined is
+FALSE,
+.I win
+is cleared and
+.I insert
+becomes the starting mode.
+.LP
+EditWindow returns
+with
+.I exitkey
+set to
+.B nokey
+if
+either
+return
+is
+entered on the last
+window line or
+an explicit
+quit command is issued (see below).
+By default any function key will also
+finish editing.
+In this case
+the terminating key
+is assigned to
+.I exitkey 
+(values to be imported from
+.IR FunctionKeys (3MOD)).
+Arrows and home key on keyboard
+are made available for editing
+by
+.IR EnableLocalMoves 
+.RI ( directions
+should be a subset of
+.IR LocalMoves).
+Single character function keys are not recognized
+by
+.I EditWindow
+unless
+.I EnableSingleCharFK
+was called before
+with
+.I recognize
+set to
+.BR TRUE 
+(default can be restored calling
+.IR EnableSingleCharFK (\c
+.BR FALSE )).
+When enabling
+single function keys,
+.I backspace
+must be defined as
+a local move,
+otherwise
+.I EditWindow
+will react rather unconventionally
+to backspace editing.
+.LP
+.I EditWindow
+has a large variety of applications,
+since
+the exit key returned
+can be interpreted as the
+result of editing
+which decides about what to do next
+(f.i. positioning within screen masks where single input field
+are represented as
+windows edited by
+means of
+.IR EditWindow ).
+.IR MapChar ,
+.IR DefineReaction ,
+and
+.IR EnableLocalMoves
+extend the capabilities of
+this feature.
+.LP
+.I DefineReaction
+defines a procedure
+.I reactproc
+that is called by
+.I EditWindow
+whenever
+the function key
+.I key
+is read.
+During this call
+.I reactproc
+may update the currently edited window
+which is received as the first parameter.
+By means of the
+boolean
+.B VAR
+parameter
+set by
+.IR reactproc ,
+.I EditWindow
+decides 
+whether to terminate editing
+or not.
+If
+.I reactproc
+yields
+.B TRUE
+.I EditWindow
+returns with
+.I exitkey
+set the
+value defined
+by
+.IR reactproc
+for its
+second parameter.
+.LP
+.IR Default  ,
+.IR Return ,
+and
+.I Ignore
+are prototype procedures of
+type
+.IR FunctionKeyReaction \&.
+If used
+as arguments to
+.IR DefineReaction ,
+.IR Return
+causes
+.I EditWindow
+to return with
+.I exitkey
+=
+.B nokey ,
+.IR Ignore
+outputs a acoustic signal
+and continues editing 
+and
+.IR Default
+resets the default reaction
+for
+.IR key \&.
+.LP
+.I MapChar 
+allows
+mapping of any character
+.I char
+into a function key
+.IR key .
+During
+subsequent
+calls of
+.I EditWindow
+input of
+.I char
+will have the same effect
+than
+.I key .
+Thus, if function keys are needed for certain applications
+but not supported by
+input terminals,
+control characters can be defined instead.
+.LP
+Note that
+.I EditWindow
+will neither recognize function keys nor
+map characters during uncompleted editing commands
+in escape mode.
+.LP
+.I CallOnce
+defines a
+procedure
+.I proc
+that is called by
+.I EditWindow
+having read the first input character.
+.I proc
+is executed
+exactly one time.
+.I CallOnce
+does not affect
+more than one call
+of
+.I EditWindow.
+.LP
+Some more
+useful procedures
+independent from
+editing window
+are provided by this module as well.
+.LP
+.I GetWindowLine
+copies
+line
+.I line
+of window
+.I win
+into string
+.IR text.
+Blanks before
+first or following last
+non space character on line are ignored
+if
+.I clearleadingspace
+respectively
+.I clearfillupspace
+equals
+.BR TRUE \&.
+.I GetWindowLine
+will return an empty
+string,
+if illegal parameters are received or
+output does not fit into
+.IR text .
+.LP 
+.I Beep
+outputs an acoustic signal to
+the device associated with
+.IR StdIO . stderr \&.
+.LP
+.I Wait
+suspends program execution until
+any key is hit
+(typeahead of input is ignored).
+.I win
+is used as an argument to
+.IR Window . WindowRead
+but remains unaffected.
+.LP
+.I ReadOneChar
+returns the first character
+read from
+the current cursor position
+of
+.IR win 
+(typeahead not recognized).
+If
+.I echo
+is
+.I TRUE
+input will be echoed.
+Initial window attributes and cursor position are
+restored.
+.LP
+.SH EDITING COMMANDS
+Within the description of editing commands
+input keys with special meaning
+are referred as follows:
+.LP
+.ta \w'<DEL>  'u
+.B <CR> \t
+carriage return (15C)
+.br
+.B <LF> \t
+line feed (12C)
+.br
+.B <BS> \t
+backspace (10C)
+.br
+.B <ESC> \t
+escape (33C)
+.br
+.B <DEL> \t
+delete (177C)
+.br
+.B <SP> \t
+a space/blank (40C)
+.br
+.I {vis} \t
+any visible character
+(40C-176C)
+.ta
+.LP
+By default
+.I EditWindow
+follows 
+UNIX-Conventions
+and reacts in the same way
+to
+.B <CR>
+and
+.BR <LF> .
+Nevertheless
+both input keys are distinguished.
+This allows mapping of
+.B <LF>
+without altering the conventional behavior
+of the return key
+on the keyboard.
+.SS Insert Mode
+.IP "{\f2vis\fP}"
+inserted at the current cursor position
+.BT <ESC>
+switch to escape mode
+.BT "<BS> <DEL>"
+erase character before current cursor position
+(restricted to characters inserted on current line
+since last switch to insert mode)
+.BT "<CR> <LF>"
+break line at current cursor position and terminate
+editing if on last window line
+.SS Replace Mode
+.IP "{\f2vis\fP}"
+replace character at the current cursor position
+.BT <ESC>
+switch to escape mode
+.BT "<BS> <DEL>"
+move left
+.BT "<CR> <LF>"
+move to beginning of next line or terminate editing if on the last one
+.SS Escape Mode
+.BT i
+switch to insert mode
+.BT I
+move to first non space character on line and switch to insert mode
+.BT a
+move right and switch to insert mode (append)
+.BT A
+move beyond last non space character on line and switch to insert mode
+.BT o
+insert an empty line after the current one and switch to insert mode
+.BT O
+insert an empty line at the current one and switch to insert mode 
+.BT R
+switch to replace mode
+.IP r\f1{\f2vis\f1}
+replace character at current position by
+.I vis
+.BT J
+join current line with the next one
+.BT "h <BS> <DEL>"
+move left
+.BT "l <SP>"
+move right 
+.BT "k \(em"
+move up (same column)
+.BT "j +"
+move down (same column, editing is not terminated if on last line)
+.BT 0
+move to beginning of current line
+.BT ^
+move to first non space character of current line
+.BT $
+move to last non space character of current line
+.BT G
+move to last line
+.IP \f1[\f31\f1-\f39\f1][\f30\f1-\f39\f1]+\f3G\f1
+move to the specified line
+.BT w
+move to next word begin (word is a sequence of non space characters)
+.BT e
+move to next word end
+.BT b
+move to last word begin
+.BT "W E B"
+as lower case letters, but words are now coherent sequences of either
+alpha numeric or punctation characters 
+.BT x
+delete character at current cursor position
+.BT dd
+delete current line
+.BT "d0 d^ d$ dw dW de dE db dB"
+delete to the position specified by second character of command
+(deletion always restricted to current line)
+.BT "<CR> <LF>"
+move to beginning of next line or terminate editing if on the last one
+.BT ZZ
+terminate editing
+.RI ( exitkey
+=
+.BR nokey )
+.SS Local Moves (if supported)
+.LP
+The following function keys are recognized by
+.I EditWindow
+only if they have been enabled
+by
+.I EnableLocalMoves 
+before.
+None of them will switch the current editing mode.
+.BT up
+move up (same column)
+.BT down
+move down (same column, no termination on last line)
+.BT right
+move right
+(same as
+.B <SP>
+in insert mode)
+.BT "left backspace"
+as
+.B <BS>
+(recation depends on current editing mode)
+.BT home
+move to upper left corner of window
+.SH DIAGNOSTICS
+.I EditWindow
+outputs an acoustic
+signal (using
+.IR Beep)
+as an answer to
+illegal input.
+.SH SEE ALSO
+.IR Windows (3MOD),
+.IR FunctionKeys (3MOD)
+.SH BUGS
+.I Beep
+will not work as expected,
+if
+.I stderr
+is not associated with
+the device where you want to hear
+the acoustic signal.

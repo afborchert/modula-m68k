@@ -1,0 +1,5 @@
+DEFINITION MODULE SysLink;
+
+   PROCEDURE Link(name1, name2: ARRAY OF CHAR) : BOOLEAN;
+
+END SysLink.

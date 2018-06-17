@@ -1,0 +1,74 @@
+.TH MainWin 3MOD "local:Borchert"
+.SH NAME
+MainWin, SetPos, GetPos, Clear, Flush, WriteString, Write, WriteLn,
+Read, ReadString, ReadInt,
+WriteInt, ReadCard, WriteCard \- simple screen operations
+.SH SYNOPSIS
+.nf
+VAR mainwin: Window;
+VAR lines, columns: CARDINAL;
+VAR Done: BOOLEAN;
+
+PROCEDURE SetPos(line, column: CARDINAL);
+
+PROCEDURE GetPos(VAR line, column: CARDINAL);
+
+PROCEDURE Clear;
+
+PROCEDURE Flush;
+
+PROCEDURE WriteString(s: ARRAY OF CHAR);
+
+PROCEDURE Write(ch: CHAR);
+
+PROCEDURE WriteLn;
+
+PROCEDURE Read(VAR ch: CHAR);
+
+PROCEDURE ReadString(VAR s: ARRAY OF CHAR);
+
+PROCEDURE WriteInt(i: INTEGER; w: CARDINAL);
+
+PROCEDURE ReadInt(VAR i: INTEGER);
+
+PROCEDURE WriteCard(c: CARDINAL; w: CARDINAL);
+
+PROCEDURE ReadCard(VAR c: CARDINAL);
+.fi
+.SH DESCRIPTION
+.I MainWin
+bases on
+.I Windows
+and
+.I FtdWin
+and offers some less sophisticated procedures.
+All procedures affect
+.I mainwin
+which is created during initialization.
+The attributes
+.I flushoninput,
+.I echo,
+and
+.I movecursor
+(see Windows(3MOD)) are initially set.
+The number of lines and columns are stored in
+.I lines
+and
+.I columns.
+Cleanup and terminal resetting is done automatically on program termination.
+See Windows(3MOD) and FtdWin(3MOD) for more detailed explanations.
+.PP
+Note that
+.I OpenDevice
+must not called if
+.I MainWin
+is imported.
+Further windows must be created using
+.I mainwin.
+.SH DIAGNOSTICS
+.I Done
+is set to
+.B FALSE
+on failure.
+.SH "SEE ALSO"
+Windows(3MOD), FtdWin(3MOD)

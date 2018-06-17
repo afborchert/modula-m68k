@@ -1,0 +1,722 @@
+.ds iN "\f2i1\fP\ \&.\&. \f2i8\fP
+.ie t .ds St "\v'.3m'\s+2*\s-2\v'-.3m'
+.el .ds St *
+.de cC
+.IP "\f3\\$1\fP"
+..
+.TH Printf 3MOD "local:Stanglow"
+.SH NAME
+Printf, FmtExitCode, SynError, OutError \- common base of formatted output toolkit
+.SH SYNOPSIS
+.DS
+CONST
+   Pabort = 201;   Labort     = 205;
+   Fabort = 202;   WabortP    = 206;
+   Sabort = 203;   WabortA    = 207;
+   Eabort = 204;   PanicAbort = 255;
+
+   TellSyntax  = 1;  TellOutput  = 2;
+   AbortSyntax = 3;  AbortOutput = 4;
+   Default     = {TellSyntax .. TellOutput};
+
+TYPE
+   FmtExitCode = (Success, Undefined, FmtPanic,
+      IllegalWidth, TooFewFormElems, TooManyFormElems,
+      IllegalConvChar, MinHat0Comb, BslashAnd0,
+      BadOctalChar, AllocFailed, StringTooSmall,
+      CannotWriteFile, CannotWriteStderr,
+      CannotWriteStdout, IllegalWindowOffset,
+      WindowTooSmall, CannotFlushWindow,
+      CannotAccessWindow, CannotWriteWindow);
+
+   FmtExitSet  = SET OF FmtExitCode;
+
+CONST
+   SynError = FmtExitSet {IllegalWidth .. BadOctalChar};
+   OutError = FmtExitSet {AllocFailed .. CannotWriteWindow};
+
+PROCEDURE Printf (output : Long; no : CARDINAL; VAR fmt :
+   ARRAY OF CHAR; VAR i1 ,i2, i3, i4, i5, i6, i7,i8 :
+   ARRAY OF BYTE) : FmtExitCode;
+.DE
+.SH DESCRIPTION
+This module is the common base of
+.IR P (3MOD),
+.IR F (3MOD),
+.IR S (3MOD),
+.IR E (3MOD),
+.IR L (3MOD)
+and
+.IR W (3MOD)
+which realize formatted output
+to various devices.
+It is not intended to be used directly but the declarations exported
+from here
+are common to all of the mentioned modules.
+Furthermore the description
+of
+.IR Printf 's
+formatting capabilities applies to all output routines of this toolkit.
+.LP
+.I Printf
+reads the format string
+.I fmt \.
+Any character not belonging to
+a escape sequence introduced by
+.B \e
+or a format element
+introduced by
+.B %
+is simply appended
+to
+.I output
+(type
+.I Long
+imported
+from
+.IR LongStrings (3MOD)).
+Escape sequences
+are substituted
+by a single
+character
+while format elements
+are instantiated
+by the first
+.I no
+parameter
+of \*(iN
+(\c
+.I no
+may be zero).
+.LP
+.I Printf
+returns
+.B Success
+on successful completion,
+a value out of
+.I SynError
+in case of illegal format specifications
+and
+.B AllocFailed
+if output cannot be appended to
+.I output.
+.LP
+The parameters of
+.I Printf
+are declared
+as
+.B VAR
+parameters
+for reasons of efficiency only.
+.I Printf
+will never updated them.
+Please note
+that this does not affect in any way the possibility to output
+expressions using the superior modules
+.IR P ,
+.I F
+etc.
+.SH "FORMAT ELEMENTS"
+Format elements do not contain any space character and fulfill
+the following syntax
+.RI ( number
+is an unsigned sequence of digits,
+.I any
+stands for any
+single character):
+.ne 11v
+.IP \f2formatelement\fP
+:
+.B  %
+.RI [ align ]
+.RI [ width ]
+[
+.B \&.
+.IR scale ]
+.I convchar
+.LP
+.IP \f2align\fP
+:
+.RB [ + ]
+[
+.B 0
+|
+.RB [ \(em | ^ ]
+.RB [ "\e
+.IR any ]
+]
+.IP \f2width\fP
+:
+.I number
+|
+.B \*(St
+.IP \f2scale\fP
+:
+.I number
+|
+.B \*(St
+.LP
+.IP \f2convchar\fP
+.TS
+tab(*);
+c 1 cb 1 c 1 cb 1 c 1 cb 1 c 1 cb 1 c 1 cb 1 c 1 cb 1 c 1 cb 1 c 1 cb 1 c 1 cb 1 c 1 cb 1 c 1 cb 1 c 1 cb.
+:*b*|*c*|*d*|*e*|*f*|*j*|*l*|*o*|*s*|*u*|*x*|*y
+|*B*|*C*|*D*|*E*|*F*|*J*|*L*|*O*|*S*|*U*|*X*|*Y
+.TE
+.LP
+Each format element defines a field in the output stream
+that is by default as wide as necessary to insert the
+result of a parameter conversion.
+The field width can be expanded
+by specifying
+.IR width .
+If not given as an explicit
+.I number
+but as
+.B \*(St
+.I Printf
+uses
+the value of the next yet unused parameter
+(interpreted as a
+.BR CARDINAL )
+as width indication.
+Larger values
+than 2048
+will cause
+.I Printf
+to return with
+.BR IllegalWidth \&,
+values less or equal than the defaults have no effect.
+In all other cases
+the output field is filled up by leading blanks.
+Fillup character and alignment strategy may be altered by means of
+.I align:
+.LP
+.cC +
+Any numeric output will be signed (by default positive
+values do not get a
+.BR + sign).
+.cC \(em
+The output will be left aligned within its field. This option
+has no effect if
+.I width
+is omitted.
+.cC 0
+The output of numeric values is filled up with leading zeroes
+.RB ( 0 ).
+This option implies
+.B \(em.
+.cC ^
+The fill up characters are inserted before the leading sign and the first digit
+of a number.
+.cC "\e \f2any\fP"
+defines
+.I any
+to become the fill up character
+.LP
+.I Printf
+will return with
+.B MinHat0Comb
+or
+.B  BslashAnd0
+on
+illegal combinations of these options (refer to syntax description above).
+.B 0
+and
+.B ^
+have no effect,
+if the output value is not a number.
+.LP
+On output
+of real values,
+.I scale
+fixes
+the number of digits following
+the decimal point.
+Other numeric output is not affected
+while strings are cut to the length
+given by
+.I scale
+before
+there are aligned within their output fields.
+Printf
+will use the next yet unused parameter
+as
+.I scale
+indication,
+if
+.B \*(St
+is specified.
+.LP
+Since
+.I Printf
+has no idea about the actual types
+of the arguments
+corresponding to
+its formal parameters,
+.I convchar
+is used to determine
+the conversions
+to be executed
+for
+the next yet unused
+parameter of
+\*(iN.
+.I Printf
+will not accept any other conversion character
+than those listed and described below
+(error return value:
+.BR IllegalConvChar).
+In detail the
+specifications of
+.I convchar
+have the following effect:
+.cC u
+decimal
+output of a
+.B CARDINAL
+.cC x
+hexadecimal
+output of a
+.B CARDINAL
+.cC o
+octal
+output of a
+.B CARDINAL
+.cC d
+decimal output
+of an
+.B INTEGER
+.cC f
+output of a
+.B REAL
+in floating point notation
+.cC e
+output of a
+.B REAL
+in its normalized exponential form
+.cC c
+output of a single
+.B CHAR
+.cC s
+output of an
+.B
+ARRAY OF CHAR
+.R
+until the first
+null byte
+(0C)
+or
+the high bound of the
+array
+is reached
+.cC b
+output of a
+.B BOOLEAN
+as text
+.B TRUE
+or
+.B FALSE
+.cC y
+output of a
+.B BOOLEAN
+as text
+.B yes
+or
+.B no
+.cC j
+output of a
+.B BOOLEAN
+as text
+.B ja
+or
+.B nein
+.cC l
+output of a
+.B CHAR
+.I width
+times
+(i.e. use the character given as parameter to draw a line of length
+.IR width ).
+Without
+explicit
+.I width
+indication same as
+.BR c.
+.LP
+If
+.I convchar
+is an upper case letter,
+.I Printf
+treats
+the parameter associated
+to the currently processed format element as
+the address
+.RB ( SYSTEM \&. ADDRESS )
+of an variable to be output
+(respectively as
+a
+.B POINTER
+.B TO
+the type
+expected for the
+corresponding
+lower case letters).
+If using
+.BR S ,
+ensure
+that
+that null byte is found at the end of
+the string or
+limit output size by specifying
+.I scale.
+.LP
+Note that
+.BR u ,
+.BR o ,
+.BR x ,
+and
+.BR d ,
+are legal conversion characters
+to output any type
+which has the
+same size (in bytes)
+as the expected one.
+This feature can be used
+to output an enumeration value
+(i.e its ordinal number)
+or an address (equal size presumed).
+Furthermore these conversion characters may be used
+to output
+the ascii-value of a
+.B CHAR .
+Vice versa
+.B c
+may be used to output a character
+that is specified by a small
+.BR CARDINAL - or
+.BR INTEGER -value.
+You should avoid other combinations than those mentioned,
+the results are undefined.
+.LP
+If
+the number of format elements within
+.I fmt
+plus the number of variable scale of width indications
+.RB ( * )
+is not
+equal to
+.IR no ,
+.I Printf
+will return with an error
+.RB ( TooManyFormElems ,
+.BR TooFewFormElems ).
+Using the high level routines
+of
+.IR P ,
+.IR F ,
+.IR S ,
+.IR E ,
+.IR W ,
+and
+.I L
+the expected number of format elements
+(including additional parameter used
+for scale or width indication)
+derives from the procedure name respectively
+from the number of formal parameters
+declared as
+.B ARRAY OF
+.BR BYTE \&.
+.LP
+.B %%
+will not be interpreted as
+a format element. A single percent character is output instead.
+.SH "ESCAPE SEQUENCES"
+Any appearance of the following escape sequences in format string
+.I fmt
+is substituted as listed:
+.IP \f3\en\fP
+newline (line feed) (12C)
+.IP \f3\er\fP
+carriage return (15C)
+.IP \f3\et\fP
+horizontal tab (11C)
+.IP \f3\ee\fP
+escape (33C)
+.IP \f3\ef\fP
+form feed (14C)
+.IP \f3\eb\fP
+backspace (10C)
+.IP \f3\e&\fP
+bell (7C)
+.IP \f3\eQ\fP
+double quote (")
+.IP \f3\eq\fP
+quote(')
+.IP \f3\e%\fP
+percent (%)
+.IP \f3\e\e\fP
+backslash (\e)
+.IP \f3\e\fP[\f30\fP-\f37\fP]+\f3C\fP
+character specified by
+.RB [ 0 - 7 ]+ C \&.
+.I Printf
+will return
+.B BadOctalChar
+on illegal character
+specifications.
+.IP "\f3\e\fP \f2other\fP"
+.I other
+(where
+.I other
+is a character not listed above)
+.SH EXAMPLES
+The formatting capabilities of
+.I Printf
+are illustrated by means of
+module P.
+All examples apply accordingly to the other
+modules of this toolkit.
+The 'input' is left aligned, output has been indented 8 spaces.
+.DS
+P.rintf1(stdout,"Hello.\en%6l\en",'-');
+.br
+        Hello.
+.br
+	------
+.br
+
+pi := 4.0 * arctan(1.0);
+.br
+scale := 3;
+.br
+P.rintf2(,"100*pi = %f or %e \en",100.0*pi,100.0*pi);
+.br
+P.rintf1(,"pi (scale=1): %.1e!\en",pi);
+.br
+P.rintf1(,"pi (scale=1): %.1e!\en",pi);
+.br
+P.rintf1(,"pi (scale=2): %10.2e!\en",pi);
+.br
+P.rintf3(,"pi (scale=%u): %.*f!\en",scale,scale,pi);
+.br
+P.rintf4(,"pi (scale=%u): %+-*.*f!\en",15,scale+1,scale+1,pi);
+.br
+
+.br
+        100*pi = 314.1592653589793 or 3.141592653589793e+02
+.br
+        pi (scale=1): 3.1e+00!
+.br
+        pi (scale=1): 3.1e+00!
+.br
+        pi (scale=2):   3.14e+00!
+.br
+        pi (scale=3): 3.142!
+.br
+        pi (scale=4): +3.1416        !
+.br
+
+.br
+string := "Hello world.";
+.br
+P.rintf1("|%s|\en",string);
+.br
+P.rintf1("|%20s|\en",string);
+.br
+P.rintf1("|%-20s|\en",string);
+.br
+P.rintf1("|%20.8s|\en",string);
+.br
+P.rintf1("|%-20.8s|\en",string);
+.br
+P.rintf1("|%5.3S|\en",ADR(string[3]));
+.br
+
+.br
+        |Hello world.|
+.br
+        |        Hello world.|
+.br
+        |Hello world.        |
+.br
+        |            Hello wo|
+.br
+        |Hello wo            |
+.br
+        |  lo |
+.br
+
+.br
+P.rintf4("%10u\en%10u\en%10u\en%10u\en",1,12,223,43333);
+.br
+
+.br
+                 1
+.br
+                12
+.br
+               223
+.br
+             43333
+.br
+
+.br
+P.rintf3("1. %+05d\en2. %+05d\en3. %+04d\en",234,-233,1000);
+.br
+
+.br
+        1. +0234
+.br
+        2. -0233
+.br
+        3. +1000
+.br
+
+.br
+val1 := 1; val2 := -20; val3 := 300;
+.br
+P.rintf5 ("%+^\e.7d\en%+^\e.7d\en%+^\e.7d\en%7l\en%+^\e.7d\en",
+.br
+  val1,val2,val3,'=',val1+val2+val3);
+.br
+
+.br
+        +.....1
+.br
+        -....20
+.br
+        +...300
+.br
+        =======
+.br
+        +...281
+.br
+
+.br
+ch := ' ';
+.br
+P.rintf4(,"char: \Q%c\Q -- octal: %o -- hex: %x -- dec: %u\en",
+.br
+   ch,ch,ch,ch);
+.br
+
+.br
+        char: " " -- octal: 40  -- hex: 20  -- dec: 32
+.br
+.DE
+.br
+.SH DIAGNOSTICS
+As already mentioned
+any illegal specification of the format string
+will cause
+.I Printf
+to return immediately with an
+result #
+.IR Success .
+The toolkit in general provides automatic
+error recognition and output success control due to the following
+conventions.
+.LP
+Errors on formatted output are divided into
+.I SynError
+which result from illegal format specifications
+and
+.I OutError
+which result from illegal parameters or
+problems on writing to the various devices.
+Any error will be treated accordingly to the bits set in the current
+error handling mode of the affected module:
+.IP \f2TellSyntax\fP
+any
+.I SynError
+(in a format string)
+will be reported to
+.IR StdIO . stderr .
+.IP \f2AbortSyntax\fP
+any
+.I SynError
+will cause a program termination.
+The relevant exit code
+is given by the constants declared
+in
+module
+.IR Printf
+.RI ( P
+will terminate with
+.I Pabort ,
+.I F
+with
+.I Fabort
+etc).
+.IP \f2TellOutput\fP
+any
+.I OutError
+will be reported
+to
+.IR StdIO . stderr .
+.IP \f2AbortOutput\fP
+any
+.I OutError
+will terminate the program
+(exit codes as above).
+.LP
+By
+default
+any error will be reported and
+cause a process termination.
+Thus,
+success of output routines has to be controlled
+only if an other error handling mode
+than
+.I Default
+has been explicitly assigned to the modules.
+.SH "SEE ALSO"
+.IR m2c (1), 
+.IR mrc (1),
+.IR P (3MOD),
+.IR F (3MOD),
+.IR E (3MOD),
+.IR S (3MOD), 
+.IR W (3MOD),
+.IR L (3MOD),
+.IR LongStrings (3MOD),
+.IR StdIO (3MOD)
+.SH BUGS
+Due to implementation restriction of
+.IR mrc (1)
+the output routines of
+.IR P ,
+.IR F ,
+.IR S ,
+.IR E ,
+.IR W ,
+and
+.IR L
+are not available for other arguments than
+simple variables
+(expressions are rejected with
+error code 214).
+.LP
+A quoted character as an argument
+to an
+.B ARRAY OF BYTE
+will be interpreted as a
+string of length one.
+Therefore
+.B s
+.RI ( not
+.BR c )
+is the suitable conversion character.
+.LP
+Strange effects will always occur if
+the parameter types are not suitable for
+the conversion characters.
+Using
+.BR %f
+or
+.BR %e 
+improperly
+may even result in
+a floating point exception.

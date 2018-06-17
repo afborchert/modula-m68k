@@ -1,0 +1,7 @@
+DEFINITION MODULE SysSetuid;
+
+   PROCEDURE Setuid(uid: CARDINAL) : BOOLEAN;
+
+   PROCEDURE Setgid(gid: CARDINAL) : BOOLEAN;
+
+END SysSetuid.

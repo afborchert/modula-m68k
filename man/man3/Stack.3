@@ -1,0 +1,120 @@
+.TH Stack 3MOD "local:Stanglow"
+.SH NAME
+Stack, Create, Dispose, Clear, Elems, Push, Pop, Top, Adr \- store any objects in lifo-manner
+.SH SYNOPSIS
+.DS
+TYPE
+   Stack; 
+
+PROCEDURE Create (VAR stack : Stack; noelem : CARDINAL;
+   example : ARRAY OF BYTE);
+
+PROCEDURE Dispose (VAR stack : Stack);
+
+PROCEDURE Clear(stack : Stack);
+
+PROCEDURE Elems (stack : Stack) : CARDINAL;
+
+PROCEDURE Push (stack : Stack; elem : ARRAY OF BYTE)
+   : BOOLEAN;
+
+PROCEDURE Pop (stack : Stack; VAR elem : ARRAY OF BYTE)
+   : BOOLEAN;
+
+PROCEDURE Top(stack : Stack; pos : CARDINAL;
+   VAR elem : ARRAY OF BYTE) : BOOLEAN;
+
+PROCEDURE Adr(stack : Stack; pos : CARDINAL;
+   VAR adr : ADDRESS) : BOOLEAN;
+.DE
+.SH DESCRIPTION
+This module supports storage of objects on a stack realized
+by type
+.I Stack .
+.I Create
+creates and allocates
+a stack
+.I stack
+for 
+.I noelem
+elements.
+The type of the objects
+to be stored derives
+from
+.I example 
+which must be of the same kind
+than the data stored subsequently.
+.I Dispose
+deallocates
+.IR stack ,
+.I Clear
+empties
+it
+and
+.I Elems
+returns the number of elements currently stored.
+.LP
+.I Push
+and 
+.I Pop
+behave in the expected manner.
+.I Push
+puts a further element
+.I elem
+onto
+.I stack ,
+.I Pop
+gets the element
+stored
+at last
+and removes it from
+the stack.
+.LP
+.I Top
+yields
+the
+last
+but
+.IR pos 'th
+element
+pushed onto
+.I stack
+without removing it.
+.LP
+An object on
+.I stack
+may be accessed by
+its storage address
+obtained from 
+.IR Adr \&,
+which sets
+.I adr
+to the address
+of the
+last
+but
+.IR pos 'th
+element stacked.
+.LP
+Using
+.I Top
+or
+.IR Adr,
+.I pos
+=
+.B 0
+always refers to
+the element on top
+of
+.IR stack \&.
+.SH DIAGNOSTICS
+All procedures check
+overflow and underflow conditions
+and
+return
+.B FALSE
+in these cases. 
+Stack access may also fail
+if the parameters
+.I elem
+are not of a suitable type.

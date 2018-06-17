@@ -1,0 +1,133 @@
+.TH Screen 3MOD "local:Borchert"
+.SH NAME
+Screen, OpenScreen, OpenScreenTI, CloseScreen, Lines, Columns,
+ClearScreen, SetCursor, MoveCursor \- simple screen operations
+.SH SYNOPSIS
+.nf
+TYPE Screen;
+TYPE CursorVisibility = (normal, invisible, morevisible);
+
+VAR Done: BOOLEAN;
+
+PROCEDURE OpenScreen(VAR scr: Screen;
+                     outfp: FILE;
+                     baudrate: CARDINAL;
+                     terminal: ARRAY OF CHAR) : BOOLEAN;
+
+PROCEDURE OpenScreenTI(VAR scr: Screen;
+                       outfp: FILE;
+                       baudrate: CARDINAL;
+                       tinfo: Term);
+
+PROCEDURE InitScreen(scr: Screen);
+
+PROCEDURE CloseScreen(VAR scr: Screen);
+
+PROCEDURE Lines(scr: Screen) : CARDINAL;
+
+PROCEDURE Columns(scr: Screen) : CARDINAL;
+
+PROCEDURE ClearScreen(scr: Screen);
+
+PROCEDURE SetCursor(scr: Screen; line, column: CARDINAL);
+
+PROCEDURE MoveCursor(scr: Screen;
+          (* from *) line1, column1,
+          (* to *)   line2, column2: CARDINAL);
+
+PROCEDURE Scroll(scr: Screen; down: BOOLEAN;
+            line, column: CARDINAL;
+            lines, columns: CARDINAL);
+
+PROCEDURE SetCursorVisibility(scr: Screen; visibility: CursorVisibility);
+.fi
+.SH DESCRIPTION
+.I Screen
+bases on
+.I TermInfo
+and offers some optimized screen operations.
+.I Done
+is set to
+.B FALSE
+if no capability is found to do the work.
+A
+.I Screen
+can be opened by either
+.I OpenScreen
+or
+.I OpenScreenTI.
+Both return on success a screen-pointer
+.I scr
+which is to be given
+on subsequently operations on it.
+Any output is sent to
+.I outfp.
+Padding depends on
+.I baudrate.
+If
+.I baudrate
+is zero no padding will be done.
+.I OpenScreen
+sends an initialization sequence to the terminal
+but does not clear the screen.
+No
+.IR ioctl (2)
+system call is done.
+So output setting like switch-off of tab-expansion
+and newline-mapping are to be done previously.
+Thus
+.I outp
+needs not to be associated with a terminal.
+.I InitScreen
+repeats the initialization sequence of
+.I OpenScreen.
+.PP
+.I CloseScreen
+deallocates the space used for
+.I scr
+but does not close the output file-pointer
+.I outfp
+which has been given to
+.I OpenScreen
+or
+.I OpenScreenTI.
+.PP
+.I Lines
+and
+.I Columns
+return the number of lines and columns of the given screen.
+If the associated capability is not set 1 is returned.
+.I ClearScreen
+clears the screen.
+.I SetCursor
+moves the cursor to the given position.
+Some optimizations (e.g. home position and last line) are done.
+.I MoveCursor
+takes
+.I line1
+and
+.I column1
+as the current position of the cursor
+and outputs an optimized sequence to move to
+.I line2
+and
+.I column2.
+.PP
+.I Scroll
+scrolls a given window of a screen
+one line downward (\fIdown\fP set to \fBTRUE\fP) or upward (forward).
+The window is defined by the upper left corner
+given by
+.I line
+and
+.I column
+and the number of
+.I lines
+and
+.I columns.
+The cursor position is undefined if successful.
+.PP
+The cursor visibility can be modified by calling
+.I SetCursorVisibility.
+Supported are \fInormal\fP, \fIinvisible\fP,
+and \fImorevisible\fP.

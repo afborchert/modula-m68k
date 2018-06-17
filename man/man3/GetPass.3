@@ -1,0 +1,27 @@
+.TH GetPass 3MOD "local:Borchert"
+.SH NAME
+GetPass \- read a password
+.SH SYNOPSIS
+.DS
+PROCEDURE GetPass(prompt: ARRAY OF CHAR;
+                  VAR passwd: ARRAY OF CHAR);
+.DE
+.SH DESCRIPTION
+If the
+.I stdin
+is a terminal,
+.I Getpass
+reads a passwd from it;
+otherwise,
+the file /dev/tty is opened for this purpose.
+The string
+.I prompt
+is prompted
+before the
+password
+is read into the array
+.IR passwd .
+Normal echoing is disabled.
+Instead, for each typed character, some random garbage is echoed.
+.SH FILES
+/dev/tty

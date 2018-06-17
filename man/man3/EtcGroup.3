@@ -1,0 +1,112 @@
+.TH EtcGroup 3MOD "local: Hasch"
+.SH NAME
+EtcGroup, MemberList, Member, Grent,
+OpenGr, GetGrent, GetGrgid, GetGrnam, ReopenGr, CloseGr,
+FetchGrgid, FetchGrnam \- scanning and searching the /etc/group file
+.SH SYNOPSIS
+.DS
+TYPE MemberList = POINTER TO Member;
+
+TYPE Member =
+         RECORD
+            logname:  ARRAY [0..7] OF CHAR;
+            nextmem:  MemberList;
+         END;
+
+TYPE Grent =
+         RECORD
+            grname:   ARRAY [0..7] OF CHAR;
+            password: ARRAY [0..15] OF CHAR;
+            gid:      CARDINAL;
+            members:  MemberList;
+         END;
+
+PROCEDURE OpenGr(filename: ARRAY OF CHAR): BOOLEAN;
+
+PROCEDURE GetGrent(VAR grent: Grent): BOOLEAN;
+
+PROCEDURE GetGrgid(gid: CARDINAL; VAR grent: Grent): BOOLEAN;
+
+PROCEDURE GetGrnam(grn: ARRAY OF CHAR; VAR grent: Grent): BOOLEAN;
+
+PROCEDURE ReopenGr(): BOOLEAN;
+
+PROCEDURE CloseGr(): BOOLEAN;
+
+PROCEDURE FetchGrgid(gid: CARDINAL; VAR grent: Grent): BOOLEAN;
+
+PROCEDURE FetchGrnam(grn: ARRAY OF CHAR; VAR grent: Grent): BOOLEAN;
+
+.DE
+.SH DESCRIPTION
+The
+.I EtcGroup
+module can be used to scan entries of
+files that have a structure as described in
+.IR group (4)
+into a
+.I Grent
+type record.
+.br
+Within
+.I Grent,
+the
+.I members
+field is a
+(possibly empty)
+.BR NIL -terminated
+list of users allowed in the group.
+.PP
+Between
+.I OpenGr
+and
+.I CloseGr,
+any (using
+.IR GetGrent )
+or the next entry whose gid cf. grname field matches
+.I gid
+cf.
+.I grn
+(using
+.I GetGrgid
+cf.
+.IR GetGrnam )
+that has not yet been read
+will be written into the
+.I grent
+record.
+.br
+At end of file, the
+.I GetXXX
+functions return
+.B FALSE
+and the data in
+.I grent
+is not valid.
+.br
+.I ReopenGr
+restarts reading the file from the top
+if it is seekable,
+otherwise reports an error.
+.PP
+Opening the file
+"/etc/group",
+searching for a single group ID cf. group name
+and closing the file again,
+can all be done at once using
+.I FetchGrgid
+cf.
+.I FetchGrnam.
+This is useful for mapping numerical group IDs to group names, e.g.,
+which is the main purpose of this module.
+.SH DIAGNOSTICS
+All
+.B BOOLEAN
+functions return
+.B TRUE
+on success, otherwise
+.B FALSE.
+.SH FILES
+/etc/group
+.SH "SEE ALSO"
+group(4), Passwd(3MOD), StdIO(3MOD)

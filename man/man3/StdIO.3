@@ -1,0 +1,173 @@
+.TH StdIO 3MOD "local:Borchert"
+.SH NAME
+StdIO, Fopen, Fclose, Fread, Fwrite, Fseek, Ftell, Feof, Ferror,
+Fgetc, Fputc, Fungetc, CloseAll, Fflush, Fdopen \- file i/o
+.SH SYNOPSIS
+.DS
+TYPE FILE;
+
+TYPE MODE = (read, write, append);
+
+VAR stdin, stdout, stderr: FILE;
+
+PROCEDURE Fopen(VAR f: FILE; name: ARRAY OF CHAR;
+                mode: MODE; buffered: BOOLEAN) : BOOLEAN;
+
+PROCEDURE Fdopen(VAR f: FILE; fd: CARDINAL; mode: MODE;
+                 buffered: BOOLEAN) : BOOLEAN;
+
+PROCEDURE Fclose(f: FILE) : BOOLEAN;
+
+PROCEDURE Fread(ptr: ADDRESS; size: CARDINAL;
+                VAR nitems: CARDINAL; f: FILE) : BOOLEAN;
+
+PROCEDURE Fwrite(ptr: ADDRESS; size: CARDINAL;
+                 VAR nitems: CARDINAL; f: FILE) : BOOLEAN;
+
+PROCEDURE Fseek(f: FILE; offset: SystemTypes.OFF;
+                whence: CARDINAL) : BOOLEAN;
+
+PROCEDURE Ftell(f: FILE;
+                VAR pos: SystemTypes.OFF) : BOOLEAN;
+
+PROCEDURE Feof(f: FILE) : BOOLEAN;
+
+PROCEDURE Ferror(f: FILE) : BOOLEAN;
+
+PROCEDURE Fgetc(VAR ch: CHAR; f: FILE) : BOOLEAN;
+
+PROCEDURE Fputc(ch: CHAR; f: FILE) : BOOLEAN;
+
+PROCEDURE Fungetc(ch: CHAR; f: FILE) : BOOLEAN;
+
+PROCEDURE CloseAll() : BOOLEAN;
+
+PROCEDURE Fflush(f: FILE) : BOOLEAN;
+.DE
+.SH DESCRIPTION
+There are three normally open streams associated with the
+standard open files:
+.PP
+.ta \w'stdout      'u
+stdin	standard input file
+.br
+stdout	standard output file
+.br
+stderr	standard error file
+.PP
+.I Fopen
+opens the file named by
+.I name
+and associates a stream with it;
+.I f
+identifies the stream in subsequent operations.
+.PP
+.I Fdopen
+associates a stream with a file descriptor obtained from
+Open, Dup, Creat, or Pipe(2).
+The
+.I mode
+of the stream must agree with the mode of the open file.
+.PP
+.I Fclose
+causes any buffers for the named stream to be emptied,
+and the file to be closed.
+.PP
+.I Fread
+reads, into a block beginning at
+.IR ptr ,
+.I nitems
+of data of the type of
+.I ptr
+with size
+.IR size .
+.I Nitems
+gives back the number of items actually read.
+.PP
+.I Fwrite
+appends at most
+.I nitems
+of data of the type of
+.I ptr
+with size
+.I size
+beginning at
+.I ptr
+to the named output stream.
+.I Nitems
+gives back the number of items actually written.
+.PP
+.I Fseek
+sets the position of the next input or output operation
+on the stream.
+The new position is at the signed distance
+.I offset
+bytes from the beginning, the current position, or the end of the file,
+according as
+.I whence
+has the value 0, 1, or 2.
+.PP
+.I Ftell
+sets
+.I pos
+to the current position.
+.PP
+.I Feof
+returns
+.B TRUE
+when end of file is read on the named input stream,
+otherwise
+.BR FALSE .
+.PP
+.I Ferror
+returns
+.B TRUE
+when an error has occurred reading or writing the
+named stream, otherwise
+.BR FALSE .
+The error indication lasts until the stream is closed.
+.PP
+.I Fgetc
+sets
+.I ch
+to the next character of the input stream.
+.PP
+.I Fputc
+appends the character
+.I ch
+at the stream
+.IR f .
+.PP
+.I Fungetc
+pushes
+.I ch
+back to the input stream
+.IR f .
+.PP
+.I CloseAll
+closes all open streams.
+.PP
+.I Fflush
+causes any buffered data for the named output stream
+to be written to that file.
+The stream remains open.
+.PP
+The streams
+.IR stdin ,
+.IR stdout ,
+.I stderr
+may be reopened:
+.PP
+.DS
+IF NOT Fclose(stdin) OR
+   NOT Fopen(stdin, file, mode, buffered) THEN
+   (* error case *)
+.br
+END;
+.DE
+.SH "SEE ALSO"
+InOut(3MOD), FtdIO(3MOD)
+.SH DIAGNOSTICS
+All routines return
+.B FALSE
+in error case.

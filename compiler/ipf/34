@@ -1,0 +1,46 @@
+Unit =          { Procedure } ENDBLOCK EOP .
+Procedure =     PROCEDURESY Nptr Block .
+Nptr =          Pointer .
+Block =         { Procedure } [ BEGINSY StatSequence ] ENDBLOCK .
+StatSequence =  { Statement } .
+Statement =     BECOMES Designator COMMA Expression |
+                CALL Designator ParamList |
+                IFSY Expression StatSequence
+                  { ELSIFSY Expression StatSequence }
+                  [ ELSESY StatSequence ] ENDSY |
+                FORSY Name COMMA Expression TOSY Expression
+                  [ BYSY Constant ] StatSequence ENDSY |
+                CASESY Expression
+                  { OFSY { ConstElem } COLON StatSequence }
+                  [ ELSESY StatSequence ] ENDSY |
+                WHILESY Expression StatSequence ENDSY |
+                REPEATSY StatSequence UNTILSY Expression |
+                LOOPSY StatSequence ENDSY |
+                RETURNSY [ LPARENT Expression RPARENT ] |
+                EXITSY |
+                WITHSY Designator StatSequence ENDSY .
+Expression =    SimpleExpr [ RelOp SimpleExpr ] .
+RelOp =         EQL | NEQ | GRT | GEQ | LSS | LEQ | INSY .
+SimpleExpr =    [ MINUS ] Term { AddOp Term } .
+AddOp =         PLUS | MINUS | ORSY .
+Term =          Factor { MulOp Factor } .
+MulOp =         TIMES | SLASH | DIVSY | MODSY | ANDSY .
+Factor =        Constant |
+                Designator [ ParamList | SetConstr ] |
+                LPARENT Expression RPARENT |
+                NOTSY Factor |
+                SetConstr .
+SetConstr =     LCONBR { Element } RCONBR .
+Element =       Expression [ RANGE Expression ] .
+ConstElem =     Constant [ RANGE Constant ] .
+Designator =    [ FIELD FieldLevel PERIOD ] Name
+                  { LBRACK Expression RBRACK |
+                    PERIOD Name | ARROW } .
+FieldLevel =    Number .
+Constant =      ANYCON TypeStruct Value .
+ParamList =     LPARENT [ Expression { COMMA Expression } ]
+                  RPARENT .
+Element =       Constant .
+Value =         Number .
+TypeStruct =    Pointer .
+Name =          NAMESY Nptr .

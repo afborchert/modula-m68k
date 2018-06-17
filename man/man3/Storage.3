@@ -1,0 +1,46 @@
+.TH Storage 3MOD "local:Borchert"
+.SH NAME
+Storage, ALLOCATE, DEALLOCATE, Setmode \- storage allocation
+.SH SYNOPSIS
+.DS
+PROCEDURE ALLOCATE(VAR a: ADDRESS; n: CARDINAL);
+
+PROCEDURE DEALLOCATE(VAR a: ADDRESS; n: CARDINAL);
+
+PROCEDURE Setmode(m: CARDINAL);
+.DE
+.SH DESCRIPTION
+.I ALLOCATE
+allocates
+.I n
+bytes memory and returns a pointer
+.I a
+to this storage area.
+.PP
+.I DEALLOCATE
+frees
+.I n
+bytes allocated storage starting at address
+.I a
+and sets a to
+.BR NIL .
+.PP
+.I Setmode
+switches the mode of reaction on storage overflow.
+If
+.I m
+equals 1
+.I ALLOCATE
+causes the abortion of the program (default).
+.I M
+equal 2
+causes
+.I ALLOCATE
+to return a
+.I NIL
+pointer.
+.SH DIAGNOSTICS
+.I ALLOCATE
+prints `No space available' to
+filedescriptor 2
+in case of abortion.

@@ -1,0 +1,99 @@
+.TH RealInOut 3MOD "local:Borchert + Schwartz"
+.SH NAME
+RealInOut, ReadReal, WriteReal, WriteFloat,
+WriteRealOct, WriteRealHex,
+FreadReal, FwriteReal, FwriteFloat,
+FwriteRealOct, FwriteRealHex,
+\&\- i/o with real numbers
+.SH SYNOPSIS
+.DS
+FROM StdIO IMPORT FILE;
+
+VAR
+   Done: BOOLEAN;
+
+PROCEDURE ReadReal(VAR x: REAL);
+
+PROCEDURE FreadReal(f: FILE; VAR x: REAL);
+
+PROCEDURE WriteReal(x: REAL; n: CARDINAL);
+
+PROCEDURE FwriteReal(f: FILE; x: REAL; n: CARDINAL);
+
+PROCEDURE WriteFloat(x: REAL; pd: CARDINAL; dp: CARDINAL);
+
+PROCEDURE FwriteFloat(f: FILE; x: REAL;
+                      pd: CARDINAL; dp: CARDINAL);
+
+PROCEDURE WriteRealOct(x: REAL);
+
+PROCEDURE FwriteRealOct(f: FILE; x: REAL);
+
+PROCEDURE WriteRealHex(x: REAL);
+
+PROCEDURE FwriteRealHex(f: FILE; x: REAL);
+.DE
+.SH DESCRIPTION
+.IR ReadReal ,
+.I FreadReal
+read a real number
+.I x
+from
+.I stdin
+\&/
+.I f
+according to following syntax:
+.br
+.sp 1
+["+" | "-"] digit { digit } ["." digit { digit } ]
+.br
+["E" ["+" | "-"] digit [digit] ]
+.br
+.sp 1
+At most 16 digits, besides leading zeroes, are significant.
+Maximum exponent is 76.
+Input terminates with a blank or any control character.
+.PP
+.IR WriteReal ,
+.I FwriteReal
+write
+.I x
+using
+.I n
+characters.
+If less than
+.I n
+characters
+are needed, leading blanks are inserted.
+.PP
+.IR WriteFloat ,
+.I FwriteFloat
+write
+.I x
+in fixed point notation using
+.I pd
+digits in front of decimal point and
+.I dp
+digits behind decimal point.
+If less than
+.I pd
+digits are needed,
+leading blanks are inserted.
+.PP
+.IR WriteRealOct ,
+.I FwriteRealOct
+and
+.IR WriteRealHex ,
+.I FwriteRealHex
+write
+.I x
+in octal/hexadecimal
+format.
+.SH DIAGNOSTICS
+.I Done
+is
+.B TRUE
+on successfull calls, otherwise
+.BR FALSE .
+.SH "SEE ALSO"
+StdIO(3MOD), Terminal(3MOD)

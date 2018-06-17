@@ -1,0 +1,91 @@
+.TH StrSpec 3MOD "local: Skalla"
+.SH NAME
+StrSpec, StrPartCpy, StrDel, StrIns, StrPos  
+.br
+\-  special string operations
+.SH SYNOPSIS
+.PP
+.DS
+PROCEDURE StrPartCpy ( VAR target           : ARRAY OF CHAR;
+.br
+                           source           : ARRAY OF CHAR;
+.br
+                           position, number : CARDINAL );
+
+PROCEDURE StrDel ( VAR target           : ARRAY OF CHAR ;
+                       position, number : CARDINAL );
+
+PROCEDURE StrIns ( VAR target      : ARRAY OF CHAR;
+                       insertion   : ARRAY OF CHAR;
+                       position    : CARDINAL );
+
+PROCEDURE StrPos ( source,
+                   search : ARRAY OF CHAR ) : CARDINAL;
+.DE
+.SH DESCRIPTION
+.LP
+.B IMPORTANT:
+.br
+In the entire module the first character of a string is at
+.I position
+zero.
+.TP
+.B StrPartCpy
+copies
+.I number
+characters starting at position
+.I position
+from
+.I source
+to
+.IR target .
+The copying is finished by reaching the end of either
+.I source
+or
+.IR target ,
+or when
+.I number
+characters are copied.
+The index of the first character in
+.I target
+is zero.
+.br
+If the resulting string is too large for
+.IR target ,
+trailing characters are cut off.
+.TP
+.B StrDel
+deletes
+.I number
+characters starting at
+.IR position .
+.br
+At the end of the string deletion stops.
+.TP
+.B StrIns
+inserts
+.I insertion
+in
+.I target
+in front of
+.IR position .
+.br
+If the resulting string is too large for
+.IR target ,
+trailing characters are cut off.
+.TP
+.B StrPos
+returns the starting position of the sub-string
+.I search
+within
+.IR source.
+.br
+If
+.I search
+isn't in
+.I source
+the result is more than the greatest possible index for a character in
+.IR source .
+.LP
+.SH "SEE ALSO"
+Strings(3MOD)

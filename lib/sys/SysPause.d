@@ -1,0 +1,5 @@
+DEFINITION MODULE SysPause;
+
+   PROCEDURE Pause;
+
+END SysPause.

@@ -1,0 +1,28 @@
+.TH Clock 3MOD "local: Hasch"
+.SH NAME
+Clock, UnitsPerSecond, RealTime, CPUTime \- report real and CPU time used
+.SH SYNOPSIS
+.DS
+CONST UnitsPerSecond = 100;
+
+PROCEDURE RealTime(reset: BOOLEAN): CARDINAL;
+
+PROCEDURE CPUTime (reset: BOOLEAN): CARDINAL;
+
+.DE
+.SH DESCRIPTION
+.I UnitsPerSecond
+stands for the local clock resolution,
+which can vary from system to system.
+.PP
+.I RealTime
+and
+.I CPUTime
+return the real, resp. CPU time in units elapsed since the start
+of the current process or since the last call with argument
+.B TRUE.
+They work independently from each other. Note that after each
+.B MAX(CARDINAL)
+units a wrap-around will happen.
+.SH "SEE ALSO"
+times(2)

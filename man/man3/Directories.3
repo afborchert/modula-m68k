@@ -1,0 +1,65 @@
+.TH Directories 3MOD "local:Ruess"
+.SH NAME
+Directories, DIR, Direct, OpenDir, ReadDir, TellDir, SeekDir, RewindDir,
+CloseDir \- reading directories
+.SH SYNOPSIS
+.nf
+FROM SystemTypes IMPORT DirSize, OFF;
+
+TYPE DIR;
+TYPE FileName = ARRAY [0..DirSize-1] OF CHAR;
+TYPE
+   Direct =
+      RECORD
+         ino: CARDINAL;
+         name: FileName;
+      END;
+
+PROCEDURE OpenDir(VAR dirp: DIR; filename: ARRAY OF CHAR) : BOOLEAN;
+
+PROCEDURE ReadDir(dirp: DIR; VAR direct: Direct) : BOOLEAN;
+
+PROCEDURE TellDir(dirp: DIR; VAR offset: OFF) : BOOLEAN;
+
+PROCEDURE SeekDir(dirp: DIR; offset: OFF) : BOOLEAN;
+
+PROCEDURE RewindDir(dirp: DIR) : BOOLEAN;
+
+PROCEDURE CloseDir(VAR dirp: DIR);
+.fi
+.SH DESCRIPTION
+.I OpenDir
+opens a directory with the name 
+.I filename
+and associates a directory stream
+with it.
+.PP
+.I ReadDir
+returns the name and the inode number of the file.
+It returns
+.B FALSE
+upon reaching the end of the directory or detecting an invalid seekdir
+operation.
+.PP
+.I TellDir
+sets
+.I offset
+to the current location associated with the named directory stream.
+.PP
+.I SeekDir
+sets the position of the next
+.I ReadDir
+operation on the directory stream.
+.PP
+.I RewindDir
+sets the position of the named directory stream
+to the beginning of the directory.
+.PP
+.I CloseDir
+closes the named directory stream.
+.SH DIAGNOSTICS
+All routines except
+.I CloseDir
+return
+.B FALSE
+in error case.

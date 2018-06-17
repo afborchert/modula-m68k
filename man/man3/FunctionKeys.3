@@ -1,0 +1,120 @@
+.TH FunctionKeys 3MOD "local:Borchert"
+.SH NAME
+FunctionKeys \- scan input for function keys
+.SH SYNOPSIS
+.nf
+TYPE FunctionKey =
+      (nokey,   (* no function key *)
+       backspace,
+       catab,   (* clear-all-tabs *)
+       clear,   (* clear screen or erase *)
+       ctab,    (* clear tab *)
+       dc,      (* delete character *)
+       dl,      (* delete line *)
+       down,    (* down arrow key *)
+       eic,     (* sent by rmir or smir in insert mode *)
+       eol,     (* clear-to-end-of-line *)
+       eos,     (* clear-to-end-of-screen *)
+       f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
+       home,
+       ic,      (* ins char/enter ins mode key *)
+       il,      (* insert line *)
+       left,    (* left arrow *)
+       ll,      (* home-down *)
+       npage,   (* next page *)
+       right,   (* right arrow *)
+       sf,      (* scroll-forward *)
+       sr,      (* scroll-backward *)
+       stab,    (* set-tab *)
+       up);     (* up arrow *)
+TYPE FunctionKeySet = SET OF FunctionKey;
+TYPE CharSet = SET OF CHAR;
+TYPE FKInfo;
+
+PROCEDURE OpenFKInfo(VAR fki: FKInfo; VAR t: Term;
+                     baudrate: CARDINAL;
+                     in, out: FILE);
+
+PROCEDURE CloseFKInfo(VAR fki: FKInfo);
+
+PROCEDURE Available(fki: FKInfo; VAR fkeys: FunctionKeySet);
+
+PROCEDURE StartSet(fki: FKInfo; VAR startset: CharSet);
+
+PROCEDURE EnableFunctionKeys(fki: FKInfo);
+
+PROCEDURE DisableFunctionKeys(fki: FKInfo);
+
+PROCEDURE Read(fki: FKInfo; timeout: BOOLEAN;
+               VAR fkey: FunctionKey; VAR ch: CHAR) : BOOLEAN;
+.fi
+.SH DESCRIPTION
+.I FunctionKeys
+allows to process function keys as defined
+in the terminfo(4) database.
+.I OpenFKInfo
+associates
+.I fki
+(which is to be given as reference on further calls)
+with a terminal description and file pointers
+(\fIout\fP is used by
+.I EnableFunctionKeys
+and
+.I DisableFunctionKeys
+and
+.I in
+is used by
+.IR Read ).
+Padding depends on
+.I baudrate.
+If
+.I baudrate
+is zero no padding will be done.
+The terminal description
+.I t
+must be non-local because
+.I FunctionKeys
+does not copy it but keeps a pointer to it.
+The space associated with
+.I fki
+can be released by calling
+.I CloseFKInfo.
+.PP
+.I Available
+returns the set of supported function keys.
+.I StartSet
+returns the set of characters function key codes start with.
+This is useful to decide whether timeouts are needed or not.
+Single character function key codes are not included in this set.
+.PP
+.I EnableFunctionKeys
+and
+.I DisableFunctionKeys
+output code (if defined in the terminfo database) to
+enable, or disable respectively, the generation of function key codes.
+.PP
+.I Read
+reads subsequently characters from input until a function key is
+encoded,
+or the input read so far cannot be a function key,
+or if
+.I timeout
+is set and a timeout (one second) occurred.
+If no function key has been found
+.I fkey
+is set to
+.I nokey
+and the first character read is returned in
+.I ch.
+Remaining characters are returned in subsequent calls.
+Function keys are returned in
+.I fkey.
+Single character function key codes are returned in
+.I fkey
+and
+.I ch.
+Else
+.I ch
+is set to 0C.
+.SH "SEE ALSO"
+TermInfo(3MOD), Windows(3MOD)

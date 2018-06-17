@@ -1,0 +1,5 @@
+DEFINITION MODULE SysClose;
+
+   PROCEDURE Close(fd: CARDINAL) : BOOLEAN;
+
+END SysClose.

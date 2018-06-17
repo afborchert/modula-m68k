@@ -1,0 +1,161 @@
+.TH Calendar 3MOD "local: Hasch"
+.SH NAME
+Calendar, Time, Date, Year, Month, Day, Hour, Minute, Second,
+Weekday, Week, Yearday, Daytime, Calendarday, CalendarInfo,
+CurrentTime, ConvertTime, ConvertDate, ConvertCald,
+CTime, CDate, CUltimo, CWeekday, DateOK, TimeToString,
+SetFirstOfWeek, GetTimezone, SetTimezone, GetLocaltime, SetLocaltime \-
+date and time calculations
+.SH SYNOPSIS
+.nf
+TYPE
+   Time         = SystemTypes.TIME;
+   Date         = LONGCARD;
+.sp 0.6v
+   Year         = CARDINAL;
+   Month        = [1..12];
+   Day          = [1..31];
+   Hour         = [0..23];
+   Minute       = [0..59];
+   Second       = [0..59];
+   Weekday      = (Mon, Tue, Wed, Thu, Fri, Sat, Sun);
+   Week         = [1..53];
+   Yearday      = [1..366];
+.sp 0.6v
+   Daytime      = RECORD
+                     hour:    Hour;
+                     minute:  Minute;
+                     second:  Second;
+                  END;
+.sp 0.6v
+   Calendarday  = RECORD
+                     year:    Year;
+                     month:   Month;
+                     day:     Day;
+                  END;
+.sp 0.6v
+   CalendarInfo = RECORD
+                     weekday: Weekday;
+                     week:    Week;
+                     yearday: Yearday;
+                  END;
+
+PROCEDURE CurrentTime(): Time;
+
+
+PROCEDURE ConvertTime(time:            Time;
+                      VAR date:        Date;
+                      VAR daytime:     Daytime);
+.sp 0.8v
+PROCEDURE ConvertDate(date: Date; VAR calendarday: Calendarday);
+.sp 0.8v
+PROCEDURE ConvertCald(calendarday:     Calendarday;
+                      VAR info:        CalendarInfo);
+
+PROCEDURE CTime(date: Date; daytime: Daytime): Time;
+.sp 0.8v
+PROCEDURE CDate(year: Year; month: Month; day: Day): Date;
+.sp 0.8v
+PROCEDURE CUltimo(year: Year; month: Month): Date;
+.sp 0.8v
+PROCEDURE CWeekday(date: Date): Weekday;
+.sp 0.8v
+PROCEDURE DateOK(year, month, day: CARDINAL): BOOLEAN;
+
+PROCEDURE TimeToString(time: Time;
+                       VAR string: ARRAY OF CHAR);
+
+PROCEDURE SetFirstOfWeek(weekday: Weekday);
+
+PROCEDURE GetTimezone(VAR tzname: ARRAY OF CHAR);
+.sp 0.8v
+PROCEDURE SetTimezone(    tzname: ARRAY OF CHAR);
+.sp 0.8v
+PROCEDURE GetLocaltime(VAR delay: Time);
+.sp 0.8v
+PROCEDURE SetLocaltime(    delay: Time);
+.fi
+.SH DESCRIPTION
+.I Calendar
+is a module supporting date and time calculations with
+the Caesar/Gregorian (i.e., our) calendar. Too,
+the time in the form used by the system can be handled.
+.PP
+.I Time
+is a
+.B LONGINT
+value of seconds since 00:00:00 GMT Jan 1, 1970 .
+.I Date
+is a day number since some date in ancient history
+- not later than Jan 1, 0001 -
+where consecutive days are always represented as consecutive numbers.
+Note that in 1582, the year of the Gregor calendar reformation, some
+dates were skipped, and that leap years occurred more often before.
+.br
+.I Week
+is a week's number in the year - edge weeks belonging to the year that
+contains more days of them.
+Only therefore it matters which weekday is
+considered the first in a week, Sunday or Monday (default), which
+can be specified with
+.I SetFirstOfWeek.
+.PP
+.I CurrentTime
+returns the system's idea of what the time is.
+.PP
+.I ConvertTime, ConvertDate
+and
+.I ConvertCald
+convert/expand values of
+.I Time, Date
+or
+.I Calendarday
+into more and more reasonable information.
+.PP
+The functions
+.I CTime
+and
+.I CDate
+do the opposite. Correct results, however, are guaranteed for correct
+arguments only.
+Which calendar dates are correct, i.e. were or will be used actually,
+can be detected with
+.I DateOK.
+.PP
+.I CUltimo
+returns the date of the last day of the given month.
+.PP
+.I CWeekday
+returns the weekday upon which the given date falls.
+.PP
+.I TimeToString
+converts a
+.I Time
+value
+.IR time
+into a character string
+.IR string
+of the form, e.g. "Thu Jan 21 16:53:27 1988 MEZ".
+Its first 24 characters always have fixed positions;
+the rest of it is the local time zone name as returned by
+.I GetTimezone (see below).
+.PP
+As the system operates in GMT (Greenwich Mean Time),
+.I Ctime, ConvertTime
+and
+.I TimeToString
+use a delay in seconds relative to GMT to compute day and hour
+in the locally appropriate way. This delay and the name of the local
+time zone are initialized according to the environment parameter
+.B TZ,
+that should contain an optional non-numeric string for the time zone name
+and a small integer value specifying hours, or a large integer (with
+absolute value >= 60) specifying seconds. These can be looked up
+cf. altered with
+.I GetLocaltime, SetLocaltime, GetTimezone
+and
+.I SetTimezone.
+.SH AUTHOR
+Martin Hasch, University of Ulm
+.SH "SEE ALSO"
+time(2), date(1), Clock(3MOD), Strings(3MOD), Environ(3MOD)

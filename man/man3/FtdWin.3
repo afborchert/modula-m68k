@@ -1,0 +1,67 @@
+.TH FtdWin 3MOD "local:Borchert"
+.SH NAME
+FtdWin, WinReadInt, WinWriteInt, WinReadCard, WinWriteCard,
+WinReadString, WinReadLine, WinWriteString, WinWriteLn \- formatted window i/o
+.SH SYNOPSIS
+.nf
+VAR Done: BOOLEAN;
+VAR termCH: CHAR;
+
+PROCEDURE WinReadInt(win: Window; VAR int: INTEGER);
+
+PROCEDURE WinWriteInt(win: Window; int: INTEGER;
+                      w: CARDINAL);
+
+PROCEDURE WinReadCard(win: Window; VAR card: CARDINAL);
+
+PROCEDURE WinWriteCard(win: Window; card: CARDINAL;
+                       w: CARDINAL);
+
+PROCEDURE WinReadString(win: Window; VAR str: ARRAY OF CHAR);
+
+PROCEDURE WinReadLine(win: Window; VAR str: ARRAY OF CHAR);
+
+PROCEDURE WinWriteString(win: Window; str: ARRAY OF CHAR);
+
+PROCEDURE WinWriteLn(win: Window);
+.fi
+.SH DESCRIPTION
+.I FtdWin
+is based on
+.I Windows
+and provides a set of i/o-procedures like
+.I InOut.
+The input routines support backspace editing.
+For conventional behavior
+.I echo
+and
+.I flushoninput
+or
+.I flushalways
+should be set (see Windows(3MOD)).
+.PP
+.I WinReadString,
+.I WinReadInt,
+and
+.I WinReadCard
+skip white space which cannot be edited using back spaces.
+.I WinReadLine
+reads a complete line (terminated by newline) without skipping.
+Reading is stopped if the given character array is filled
+.RI ( WinReadString
+and
+.IR WinReadLine )
+or a delimiting character is typed (returned in
+.IR termCH ).
+.SH DIAGNOSTICS
+.I Done
+is set to
+.B FALSE
+if anything fails.
+Exceptions are the reading procedures which do not set
+.I Done
+to
+.B FALSE
+if errors result from echoing.
+.SH "SEE ALSO"
+MainWin(3MOD), Windows(3MOD), Screen(3MOD), TermInfo(3MOD), InOut(3MOD)

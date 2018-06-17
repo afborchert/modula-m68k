@@ -1,0 +1,266 @@
+.TH MDB 1 "local:Borchert"
+.SH NAME
+mdb \- Modula-2 debugger
+.SH SYNOPSIS
+mdb [-f] [objfile [corfile]]
+.SH DESCRIPTION
+.I Mdb
+is a Modula-2 debugging tool.
+.I Objfile
+is an executable program file (default: a.out).
+.I Corfile
+is assumed to be a core image file produced after executing
+.I objfile;
+the default for
+.I corfile
+is core.
+Under f-option
+.I mdb
+gives a backtrace and error diagnostics.
+Otherwise
+.I mdb
+changes to command mode.
+.SH WINDOWS
+.I Mdb
+builds up a tree of windows according to the program found in
+.I objfile
+and the reference files of the modules used in the program.
+The
+.I M-window
+(i.e. the root) contains the list of all global modules.
+The
+.I D-windows
+show the contents of all variables of a certain level.
+The procedure backtrace is shown in the
+.I P-window.
+You can examine parts of your source code by using the
+.I T-window.
+The
+.I C-window
+enables you to read the core dump.
+For example, you select a certain procedure shown in the
+.I P-window
+by moving the cursor to it, then change to
+.I D-window
+to examine the variable values.
+The
+.I I-window
+allows to examine disassembled code.
+.SH COMMANDS
+The command lines of the mdb are of the following syntax:
+.TS
+center;
+l l.
+
+line	= cmd { ";" cmd }.
+cmd	= count letter { arg } .
+arg	= intarg | strarg .
+count	= intarg .
+intarg	= ["-"] digit { digit } [H|B] .
+strarg	= text | "'" text "'" | '"' text '"' .
+.TE
+.TP 5
+.B "q, x"
+\c
+exit
+.TP 5
+.B "!"
+\c
+shell command
+.TP 5
+.B "= value ['x'|'d'|'o']
+convert
+.I value
+into hexadecimal, decimal (default) or octal format.
+.TP 5
+.B e
+\c
+print run time error messages
+.TP 5
+.B h
+\c
+displays an overview of the commands.
+.TP 5
+.B i [address] ['d'|'t']
+\c
+switches to the \fII-window\fP at location
+.I address
+in space 't' (a.out-file: default) or 'd' (core-file / current process).
+If
+.I address
+isn't specified the next instruction after the last 'i' command
+will be printed.
+.TP 5
+.B "$m ['x'|'d'|'o']"
+\c
+print map in hexidecimal (default),
+decimal, or octal format (for further information about maps see sdb(1)).
+.TP 5
+.B "$r ['x'|'d'|'o']"
+\c
+print register contents and the last instruction.
+If a run time library routine is executed,
+two instructions will be printed:
+that of the library routine and the next instruction
+of the Modula-2 procedure.
+.PP
+.B "Window Switches"
+.TP 5
+.B p
+\c
+switch to
+.I P-window.
+.TP 5
+.B "P [pdesc]"
+\c
+Modula-2 process switch.
+The optional parameter specifies the address of a process descriptor.
+The address may be omitted if being in a
+.I D-window
+and a process variable have been choosen.
+.TP 5
+.B M
+\c
+Switch to current coroutine.
+(Useful after 'P' command.)
+.TP 5
+.B d
+\c
+switch to
+.I D-window.
+.TP 5
+.B m
+\c
+switch to
+.I M-window.
+.TP 5
+.B "c [address ['x'|'d'|'o'|'c' ['x'|'d'|'o']]]"
+\c
+switch to
+.I C-window.
+The
+.I C-window
+starts at
+.I address
+if specified,
+else it displays the contents of the current variable.
+The second parameter determines the data format,
+the third paramter determines the address format.
+.TP 5
+.B "t [filename]"
+\c
+switch to
+.I T-window.
+.PP
+.B Positioning
+.TP 5
+.B "<return>, + [lines]"
+\c
+next line / move
+.I lines
+lines (default: 1) forward.
+.TP 5
+.B "- [lines]"
+\c
+move
+.I lines
+lines (default: 1) backward.
+.TP 5
+.B "b"
+\c
+display last page.
+.TP 5
+.B "n"
+\c
+display next page.
+.TP 5
+.B "u"
+\c
+print context of current line.
+.TP 5
+.B "/pattern"
+\c
+search forward for pattern.
+.TP 5
+.B "?pattern"
+\c
+search backwards for pattern.
+.PP
+.B Process Control
+.TP 5
+.B R
+\c
+start process
+.TP 5
+.B C
+\c
+continue process
+.TP 5
+.B I
+\c
+continue process and ignore last interrupt
+.PP
+.B Breakpoints
+.PP
+Breakpoints may be set at the begin and end of every procedure.
+For each breakpoint a counter has to be specified
+according to following rule:
+.TP 10
+0
+\c
+ignore breakpoint
+.TP 10
+n > 0
+\c
+stop when breakpoint is reached the
+n-th time
+and delete breakpoint.
+.TP 10
+-1
+\c
+stop every time breakpoint is reached.
+.PP
+.TP 5
+.B "B [count1 [count2]]"
+\c
+set breakpoints at begin of the procedure (\fIcount1\fP)
+and at the end of the procedure (\fIcount2\fP).
+.TP 5
+.B D
+\c
+delete breakpoint
+.SH ENVIRONMENT
+.TP 5
+.B "MODPATH"
+\c
+.I MODPATH
+specifies a list of directories separated by colons.
+This path is used for the search of reference file archives named
+.I REF.
+.TP 5
+.B "SRCPATH"
+\c
+This path is used on the search for source files (\fIT-window\fP!)
+and reference files.
+.TP 5
+.B "MDBPS"
+\c
+defines the prompt (default: "> ").
+.SH CAVEATS
+Avoid commands like "/7" because 7 is interpreted as an integer
+argument and "/" expects a string argument.
+The correct solution ist "/'7'" which enforces the "7" to be interpreted
+as string argument.
+.SH SEE ALSO
+m2c(1)
+.SH FILES
+.ta \w'/u/lib/modula/REF   'u
+*.r	reference files
+.br
+REF	archive with reference files
+.br
+/u/lib/modula/REF	Modula-2 library reference files
+.br
+a.out	default object file
+.br
+core	default core file

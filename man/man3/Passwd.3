@@ -1,0 +1,97 @@
+.TH Passwd 3MOD "local: Hasch"
+.SH NAME
+Passwd, Pwent, OpenPw, GetPwent, GetPwuid, GetPwnam, ReopenPw, ClosePw,
+FetchPwuid, FetchPwnam \- scanning and searching the password file
+.SH SYNOPSIS
+.DS
+TYPE Pwent =
+         RECORD
+            logname:  ARRAY [0..7] OF CHAR;
+            password: ARRAY [0..15] OF CHAR;
+            uid:      CARDINAL;
+            gid:      CARDINAL;
+            fullname: ARRAY [0..31] OF CHAR;
+            dir:      ARRAY [0..31] OF CHAR;
+            shell:    ARRAY [0..31] OF CHAR;
+         END;
+
+PROCEDURE OpenPw(filename: ARRAY OF CHAR): BOOLEAN;
+
+PROCEDURE GetPwent(VAR pwent: Pwent): BOOLEAN;
+
+PROCEDURE GetPwuid(uid: CARDINAL; VAR pwent: Pwent): BOOLEAN;
+
+PROCEDURE GetPwnam(logn: ARRAY OF CHAR; VAR pwent: Pwent): BOOLEAN;
+
+PROCEDURE ReopenPw(): BOOLEAN;
+
+PROCEDURE ClosePw(): BOOLEAN;
+
+PROCEDURE FetchPwuid(uid: CARDINAL; VAR pwent: Pwent): BOOLEAN;
+
+PROCEDURE FetchPwnam(logn: ARRAY OF CHAR; VAR pwent: Pwent): BOOLEAN;
+
+.DE
+.SH DESCRIPTION
+The
+.I Passwd
+module can be used to scan entries of
+files that have a structure as described in
+.IR passwd (4)
+into a
+.I Pwent
+type record.
+.PP
+Between
+.I OpenPw
+and
+.I ClosePw,
+any (using
+.IR GetPwent )
+or the next entry whose uid cf. logname field matches
+.I uid
+cf.
+.I logn
+(using
+.I GetPwuid
+cf.
+.IR GetPwnam )
+that has not yet been read
+will be written into the
+.I pwent
+record.
+.br
+At end of file, the
+.I GetXXX
+functions return
+.B FALSE
+and the data in
+.I pwent
+is not valid.
+.br
+.I ReopenPw
+restarts reading the file from the top
+if it is seekable,
+otherwise reports an error.
+.PP
+Opening the file
+"/etc/passwd",
+searching for a single uid cf. logname
+and closing the file again,
+can all be done at once using
+.I FetchPwuid
+cf.
+.I FetchPwnam.
+This is useful for mapping numerical user IDs to names, e.g.,
+which is the main purpose of this module.
+.SH DIAGNOSTICS
+All
+.B BOOLEAN
+functions return
+.B TRUE
+on success, otherwise
+.B FALSE.
+.SH FILES
+/etc/passwd
+.SH "SEE ALSO"
+passwd(4), EtcGroup(3MOD), StdIO(3MOD)

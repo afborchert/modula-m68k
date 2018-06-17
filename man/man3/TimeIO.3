@@ -1,0 +1,207 @@
+.TH TimeIO 3MOD "local:Borchert"
+.SH NAME
+TimeIO \- i/o of time and date
+.SH SYNOPSIS
+.DS
+TYPE Style = (date, ls, env);
+
+VAR Done: BOOLEAN;
+VAR termCH: CHAR;
+
+PROCEDURE WriteTime(format: ARRAY OF CHAR; time: Time);
+
+PROCEDURE FwriteTime(file: FILE;
+                     format: ARRAY OF CHAR; time: Time);
+
+PROCEDURE SwriteTime(VAR string: ARRAY OF CHAR;
+                     format: ARRAY OF CHAR; time: Time);
+
+PROCEDURE WriteTimeLike(style: Style; time: Time);
+
+PROCEDURE FwriteTimeLike(file: FILE;
+                         style: Style; time: Time);
+
+PROCEDURE SwriteTimeLike(VAR string: ARRAY OF CHAR;
+                         style: Style; time: Time);
+
+PROCEDURE ReadTime(VAR time: Time);
+
+PROCEDURE FreadTime(file: FILE; VAR time: Time);
+
+PROCEDURE SreadTime(string: ARRAY OF CHAR; VAR time: Time);
+
+PROCEDURE WriteDate(format: ARRAY OF CHAR; date: Date);
+
+PROCEDURE FwriteDate(file: FILE; format: ARRAY OF CHAR;
+                     date: Date);
+
+PROCEDURE SwriteDate(VAR string: ARRAY OF CHAR;
+                     format: ARRAY OF CHAR; date: Date);
+
+PROCEDURE ReadDate(VAR date: Date);
+
+PROCEDURE FreadDate(file: FILE; VAR date: Date);
+
+PROCEDURE SreadDate(string: ARRAY OF CHAR; VAR date: Date);
+
+PROCEDURE Append(format: ARRAY OF CHAR);
+
+PROCEDURE Insert(format: ARRAY OF CHAR);
+
+PROCEDURE ReleaseList;
+
+PROCEDURE DefaultList;
+.DE
+.SH DESCRIPTION
+The basic types of this module are
+.I Time
+and
+.I Date
+which are to be imported from
+.I Calendar.
+.I Time
+is the systems type of time
+(in seconds since January 1, 1970 GMT).
+Earlier times are possible because
+.I Time
+is a
+.B LONGINT.
+.PP
+Output is done using formats which are close to those of the
+\fIdate\fP(1) command.
+All output fields are of fixed size (zero padded if necessary).
+Each field descriptor is preceded by % and will be replaced in the
+output by its corresponding value.
+A single % is encoded by %%.
+All other characters are copied to the output without change.
+Note that in opposite to \fIdate\fP(1) no new-line character is
+appended to the string.
+.PP
+Field Descriptors:
+.TS
+center;
+lfB l.
+n	insert a new-line character
+t	insert a tab character
+m	month of year - 01 to 12
+d	day of month - 01 to 31
+y	last 2 digits of year - 00 to 99
+D	date as mm/dd/yy
+H	hour - 00 to 23
+M	minute - 00 to 59
+S	second - 00 to 59
+T	time as HH:MM:SS
+j	day of year - 001 to 366
+w	day of week - Sunday = 0
+a	abbreviated weekday - Sun to Sat
+h	abbreviated month - Jan to Dec
+r	time in AM/PM notation
+Y	year in 4 digits - 0000 to 9999
+Z	timezone in 3 letters
+.TE
+Note that \fBY\fP and \fBZ\fP has been added.
+.PP
+.I WriteTime,
+.I FwriteTime,
+and
+.I SwriteTime
+print
+.I time
+according to the given
+.I format
+either to
+.I StdIO.stdout,
+.I file,
+or into
+.I string.
+If dates are printed using
+.I WriteDate,
+.I FwriteDate,
+or
+.I SwriteTime
+then hour, minute, and second are set to null if printed.
+.I WriteTimeLike,
+.I FwriteTimeLike,
+and
+.I SwriteTimeLike
+print
+.I time
+according to
+.I style:
+.LP
+.TS
+center;
+lfB l.
+date	format of \fIdate\fP(1)
+ls	format of \fIls\fP(1)
+env	format found in the environment
+	variable \fBTIMEFMT\fP
+.TE
+.PP
+Reading of time and date depends on an ordered list of valid formats
+and a set of termination characters.
+This list can be extended using either
+.I Append
+or
+.I Insert.
+.I Append
+appends a new format at the end of the list and
+.I Insert
+inserts a new format before the beginning of the list.
+.I DefaultList
+appends a set of standard formats to the list and
+.I ReleaseList
+disposes the current list.
+The number of formats is limited, so
+.I Done
+should be checked after extending the list.
+An input format consists of a sequence of some letters with
+special meanings (see below) and other characters which must
+match the input.
+White space skipping (except new-line) is done by the reading procedure,
+so white space must not be given in input formats.
+.LP
+Field descriptors in input formats:
+.TS
+center;
+lfB l.
+y	year, 88 becomes 1988
+m	month, either 1 to 12 or Jan to Dec
+d	day, 1 to 31
+H	hour, 0 to 23
+M	minute, 0 to 59
+S	second, 0 to 59
+.TE
+.LP
+Examples:
+.TS
+center;
+l l.
+"m/d/yH:M:S"	us-date, matches "10/23/88 23:11:10"
+"d.m.yH:M:S"	german date, matches "23.10.88 23:11:10"
+"md,y"	matches "Oct 23, 1988"
+.TE
+.LP
+Input is read until any termination character is found or
+none of the formats matches the input read so far.
+Termination characters are all characters except those not given
+in any of the input formats.
+If more than one format applies the first is taken.
+An input format needs not to include all time components.
+Missing values are defaulted by the current time or set to their
+minimal value.
+Read dates and times must be representable in the corresponding types:
+.LP
+Valid time ranges:
+.TS
+center;
+lfI l l.
+Time	Dec 14, 1901 0:0:0	Dec 12, 2037, 23:59:59
+Date	Jan 1, 100 0:0:0	Dec 24, 2037, 23:59:59
+.TE
+.LP
+Note that years less than 100 cannot be read because they are defaulted
+to the current century (so 88 becomes 1988).
+The time ranges are independent from the timezone.
+.SH "SEE ALSO"
+date(1), Calendar(3MOD), StdIO(3MOD)

@@ -1,0 +1,54 @@
+.TH FtdIO 3MOD "local:Borchert"
+.SH NAME
+FtdIO, FreadInt, FwriteInt, FreadCard, FwriteCard,
+FreadString, FwriteString, FwriteLn, Fread, Fwrite,
+FreadWord, FwriteWord,
+FreadChar, FwriteChar, \- formatted file i/o
+.SH SYNOPSIS
+.DS
+FROM StdIO IMPORT FILE;
+
+VAR Done: BOOLEAN;
+
+VAR termCH: CHAR;
+
+PROCEDURE FreadInt(f: FILE; VAR int: INTEGER);
+
+PROCEDURE FwriteInt(f: FILE; int: INTEGER; w: CARDINAL);
+
+PROCEDURE FreadCard(f: FILE; VAR card: CARDINAL);
+
+PROCEDURE FwriteCard(f: FILE; card: CARDINAL; w: CARDINAL);
+
+PROCEDURE FreadString(f: FILE; VAR str: ARRAY OF CHAR);
+
+PROCEDURE FwriteString(f: FILE; str: ARRAY OF CHAR);
+
+PROCEDURE FwriteLn(f: FILE);
+
+PROCEDURE Fread(f: FILE; VAR arr: ARRAY OF WORD);
+
+PROCEDURE Fwrite(f: FILE; arr: ARRAY OF WORD);
+
+PROCEDURE FreadWord(f: FILE; VAR w: WORD);
+
+PROCEDURE FwriteWord(f: FILE; w: WORD);
+
+PROCEDURE FreadChar(f: FILE; VAR ch: CHAR);
+
+PROCEDURE FwriteChar(f: FILE; ch: CHAR);
+.DE
+.SH DESCRIPTION
+.I FtdIO
+provides a rich set of file i/o routines and is based on the
+.IR StdIO .
+.PP
+The first parameter
+.I f
+always specifies the stream.
+See Files(3MOD) or StdIO(3MOD) for
+opening streams and some standard streams.
+See InOut(3MOD) for
+description of the other parameters.
+.SH "SEE ALSO"
+StdIO(3MOD), Files(3MOD), InOut(3MOD), RealInOut(3MOD)

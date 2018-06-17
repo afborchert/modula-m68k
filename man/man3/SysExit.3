@@ -1,0 +1,47 @@
+.TH SysExit 3MOD "local:Borchert"
+.SH NAME
+SysExit, Exit, EnterCleanup \- terminate process
+.SH SYNOPSIS
+.nf
+PROCEDURE Exit(errorCode: CARDINAL);
+
+PROCEDURE EnterCleanup(p: PROC);
+.fi
+.SH DESCRIPTION
+The call of
+.I Exit
+causes the process to terminate with exit code
+.IR errorCode .
+An
+.I errorCode
+of 0 indicates success.
+All other codes are interpreted as failure by
+command shells.
+.I EnterCleanup
+causes
+.I p
+to be called on exiting.
+Multiple calls of
+.I EnterCleanup
+are possible.
+In this case
+.I Exit
+calls the cleanup procedures in reverse order (LIFO).
+Recursive calls of
+.I Exit
+(by cleanup procedures)
+causes
+.I Exit
+to exit immediately.
+.PP
+On return of the main module body
+.I Exit
+is called with
+.I errorCode
+0.
+.I Exit
+is not called on run time error aborts.
+.SH "SEE ALSO"
+exit(2), sh(1)
+.SH BUGS
+The number of cleanup procedures is limited.

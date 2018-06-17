@@ -1,0 +1,9 @@
+LineMark =      EOL LineNumber .
+LineNumber =    Number .
+
+Error =         ERRORSY ErrorNumber .
+ErrorNumber =   Number .
+
+Option =        OPTION LetterVal Switch .
+LetterVal =     Number .
+Switch =        PLUS | MINUS .

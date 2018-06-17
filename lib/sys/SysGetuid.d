@@ -1,0 +1,11 @@
+DEFINITION MODULE SysGetuid;
+
+   PROCEDURE Getuid() : CARDINAL;
+
+   PROCEDURE Geteuid() : CARDINAL;
+
+   PROCEDURE Getgid() : CARDINAL;
+
+   PROCEDURE Getegid() : CARDINAL;
+
+END SysGetuid.

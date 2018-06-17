@@ -1,0 +1,37 @@
+.TH Strings 3MOD "local:Borchert"
+.SH NAME
+Strings, StrLen, StrCat, StrCmp, StrCpy \- simple string operations
+.SH SYNOPSIS
+.DS
+PROCEDURE StrLen(s: ARRAY OF CHAR) : CARDINAL;
+
+PROCEDURE StrCat(VAR s1: ARRAY OF CHAR; s2: ARRAY OF CHAR);
+
+PROCEDURE StrCmp(s1, s2: ARRAY OF CHAR) : INTEGER;
+
+PROCEDURE StrCpy(VAR s1: ARRAY OF CHAR; s2: ARRAY OF CHAR);
+.DE
+.SH DESCRIPTION
+.I StrLen
+returns the number of non-null characters in
+.IR s .
+.PP
+.I StrCat
+appends a copy of string
+.I s2
+to the end of string
+.IR s1 .
+.PP
+.I StrCmp
+compares its arguments and returns an integer
+greater than,
+equal to,
+or less than 0,
+according as
+.I s1
+is lexicographically greater than,
+equal to,
+or less than
+.IR s2 .
+.SH "SEE ALSO"
+StrSpec(3MOD)

@@ -1,0 +1,25 @@
+.TH ARGC 3MOD "local:Borchert"
+.SH NAME
+ARGC, ARGV \- get command line arguments
+.SH SYNOPSIS
+.DS
+PROCEDURE ARGC() : CARDINAL;
+
+PROCEDURE ARGV(VAR buffer: ARRAY OF CHAR;
+               argindex: CARDINAL);
+.DE
+.SH DESCRIPTION
+These procedures belong to the standard procedures
+and needn't to be imported.
+.PP
+.I ARGC
+returns the number of command line arguments
+(incl. command name).
+.PP
+.I ARGV
+stores a single command line argument
+addressed by
+.I argindex
+(ranging from 0 to ARGC()-1)
+into
+.IR buffer .

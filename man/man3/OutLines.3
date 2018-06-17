@@ -1,0 +1,143 @@
+.TH OutLines 3MOD "local:Stanglow"
+.SH NAME
+OutLines, MaxLines, SetLong, SetFile, DefineLine, OutAll, OutNext, OutPrev, OutRange \- pagewise output
+.SH SYNOPSIS
+.nf
+VAR MaxLines : INTEGER;
+
+PROCEDURE SetFile(file : FILE);
+
+PROCEDURE SetLong(long : Long);
+
+PROCEDURE DefineLine(relatively: BOOLEAN; line : INTEGER) : BOOLEAN;
+
+PROCEDURE OutAll() : BOOLEAN;
+
+PROCEDURE OutNext() : BOOLEAN;
+
+PROCEDURE OutPrev() : BOOLEAN;
+
+PROCEDURE OutRange (begin,end : INTEGER) : BOOLEAN;
+.fi
+.SH DESCRIPTION
+.I OutLines
+allows a pagewise output of text
+stored in a dynamic string
+of type
+.I Long
+(imported from
+.IR LongStrings (3MOD)).
+.LP
+.I SetFile
+defines
+a new out stream
+.I file
+(default
+.IR StdIO . stdout ),
+.I SetLong
+defines a
+new output source
+.IR long 
+(no default)
+and marks
+.B 0
+as the current line.
+.LP
+.I OutNext
+outputs the next
+at most
+.I MaxLines
+lines (default 23)
+found in long to
+stream
+.IR file .
+The last output line
+becomes the new current line.
+.LP
+.I OutPrev
+outputs
+at most
+.I MaxLines
+preceding the current line.
+The first output line
+becomes the new current line.
+.LP
+.I DefineLine 
+defines
+a new current line.
+If
+.I relatively
+is
+.B TRUE
+the old value is incremented
+by
+.I line
+else
+the current line is set to
+.I line
+(absolutely).
+An absolute line number
+may specified as
+.B 0 
+or
+.B -1
+to mark positions before or beyond any other line.
+.LP
+.I OutAll
+outputs
+.I long
+completely and sets the current line
+to
+-1 (beyond any other).
+.LP
+.I OutRange
+outputs
+the range defined by
+.RI [ from , to ]
+without affecting the current line.
+.LP
+Each redefinition of
+.I MaxLines
+and any update
+of the contents
+behind long
+requires
+a reinitialization of output
+by
+.IR  SetLong \&.
+.LP
+The output produced by this modules
+will be echoed to further files
+after suitable calls of
+.IR LongStrings . Echo .
+.SH DIAGNOSTICS
+Output routines return
+.B FALSE
+if output is exhausted,
+if the requested lines
+are not available
+or if writing to
+.I file
+fails.
+.SH SEE ALSO
+.IR LongStrings (3MOD),
+.IR L(3MOD),
+.IR StdIO (3MOD),
+.SH BUGS
+Output will fail,
+if the
+last character
+of
+.I long
+is not a
+newline(12C).
+.LP
+Unpredictable effects may occur
+if the contents of
+.I long
+has been updated
+without a following
+reinitialization
+of output
+by
+.IR SetLong .

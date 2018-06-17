@@ -1,0 +1,78 @@
+.TH TermInfo 3MOD "local:Borchert"
+.SH NAME
+TermInfo, Term, SetupTerm, Tparm, Tparm1, Tparm2, Tparm3, Tparm4,
+Tputs, TputsDelay \- interface to terminal capability data base
+.SH SYNOPSIS
+.nf
+TYPE OutProc = PROCEDURE (CHAR);
+TYPE DelayProc = PROCEDURE (CARDINAL);
+TYPE Term = RECORD (* ... *) END;
+
+PROCEDURE SetupTerm(tname: ARRAY OF CHAR;
+                    VAR tinfo: Term) : BOOLEAN;
+
+PROCEDURE Tparm(VAR out: ARRAY OF CHAR;
+                fmt: ARRAY OF CHAR);
+
+PROCEDURE Tparm1(VAR out: ARRAY OF CHAR;
+                 fmt: ARRAY OF CHAR;
+                 arg1: ARRAY OF BYTE);
+
+PROCEDURE Tputs(str: ARRAY OF CHAR; affcnt: CARDINAL;
+                outc: OutProc);
+
+PROCEDURE TputsDelay(str: ARRAY OF CHAR; affcnt: CARDINAL;
+                     outc: OutProc; delay: DelayProc);
+.fi
+.SH DESCRIPTION
+.I TermInfo
+allows to access the terminfo database as described in terminfo(4).
+The routines are similar to the terminfo level routines of curses(3X)
+but no output is generated nor any \fIioctl\fP-calls are done.
+This allows
+.I TermInfo
+to work for more than one terminal at a time.
+.PP
+.I SetupTerm
+looks for a terminal description for
+.I tname
+(an empty string causes the environment parameter \fBTERM\fP
+to be taken).
+On success \fItinfo\fP is filled and \fBTRUE\fP is returned.
+Failures result from unknown terminals or corrupted
+terminfo database entries.
+.PP
+The type \fITerm\fP is generated from \fI/usr/include/term.h\fP.
+Each component name starts with an upper case letter.
+Underlines followed by lower case letters are replaced by
+upper case (e.g. \fIcursor_address\fP becomes \fICursorAddress\fP).
+Capabilities are of three different types:
+\fIString\fP (fixed length character array),
+\fBINTEGER\fP, and \fBBOOLEAN\fP.
+Capabilities in \fITerm\fP which are not defined in the database
+are set accordingly to empty strings, -1, and \fBFALSE\fP.
+.PP
+.I Tparm, Tparm1, ...
+are used to decode the capability \fIfmt\fP and
+to instantiate the parameters into \fIout\fP.
+Delay information still remains in \fIout\fP.
+These routines abort with a message on \fIStdIO.stderr\fP
+on errors in \fIfmt\fP or on too few parameters.
+.PP
+.I Tputs
+prints \fIstr\fP using \fIoutc\fP
+and interprets the delay information
+which sometimes depends on the number of lines affected \fIaffcnt\fP
+(give 1 if not applicable).
+Because the baud-rate is not known no padding will be done.
+Instead, a busy-loop with system calls
+(resolution see \fIClock.UnitsPerSecond\fP)
+does the work.
+.PP
+.I TputsDelay
+works like
+.I Tputs
+but calls \fIdelay\fP if delay informations are found.
+The delay time is given in tenth of milliseconds.
+.SH "SEE ALSO"
+curses(3X), term(4), terminfo(4)

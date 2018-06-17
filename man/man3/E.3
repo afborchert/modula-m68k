@@ -1,0 +1,253 @@
+.ds iN "\f2i1\fP\ \&.\&. \f2i8\fP
+.ie t .ds St "\v'.3m'\s+3*\s-3\v'-.3m'
+.el .ds St *
+.de cC
+.IP "\f3\\$1\fP"
+..
+.TH E 3MOD "local:Stanglow"
+.SH NAME
+E, rror0, rror1, rror2, rror3, rror4, rror5, rror6, rror7, rror8, done, success, setmode, getmode, ExitCode, AddFatalLine, EnterInitProc, EnterExitProc, ClearInitProc, ClearExitProc, SigSet, UserSignal, FatalSignal, Signals \- formatted error messages
+.SH SYNOPSIS
+.DS
+TYPE 
+   ExitCode = [-1..255];
+   SigSet   = SET OF Sig;
+
+CONST
+   UserSignal  = SigSet {SIGHUP, SIGINT, SIGQUIT, SIGTERM};
+   FatalSignal = SigSet {SIGILL..SIGUSR2} - SigSet{SIGKILL};
+   
+(* diagnostic *)
+
+PROCEDURE done () : BOOLEAN;
+
+PROCEDURE success() : FmtExitCode;
+
+(* error handling *)
+
+PROCEDURE setmode (mode : BITSET);
+
+PROCEDURE getmode (VAR mode : BITSET);
+
+(* output *)
+
+PROCEDURE rror0 (exit : ExitCode; fmt : ARRAY OF CHAR);
+
+PROCEDURE rror1 (exit : ExitCode; fmt : ARRAY OF CHAR;
+   i1 : ARRAY OF BYTE);
+
+PROCEDURE rror2 (exit : ExitCode; fmt : ARRAY OF CHAR; 
+   i1, i2 : ARRAY OF BYTE);
+
+(* ... *)
+
+PROCEDURE rror8 (exit : ExitCode; fmt : ARRAY OF CHAR;
+   i1, i2, i3, i4, i5, i6, i7 , i8 : ARRAY OF BYTE);
+
+(* useful procedures *)
+
+PROCEDURE AddFatalLine(text : ARRAY OF CHAR);
+
+PROCEDURE EnterInitProc(proc : PROC);
+
+PROCEDURE EnterExitProc(proc : PROC);
+
+PROCEDURE ClearInitProc();
+
+PROCEDURE ClearExitProc();
+
+PROCEDURE Signals(set : SigSet; proc : PROC);
+.DE
+.SH DESCRIPTION
+.IR E . rror0
+\&..\&
+.IR E . rror8
+(the procedures are intended to be called qualified,
+that explains their strange names)
+convert their parameters \*(iN,
+instantiate them into the format string
+.I fmt ,
+add some
+information and output the whole
+text as an error message to
+.IR StdIO . stderr .
+Finally
+.IR E . rror0
+\&..\&
+.IR E . rror8
+will terminate the
+current process
+if
+.I exit 
+does not equal zero (0).
+.IP "\f2exit\fP\ =\ 0"
+An error message of the following form is issued,
+where 'formatted message' is produced from the parameter
+.IR fmt ,
+\*(iN
+according to the
+general formatting
+capabilities
+described in
+Printf(3MOD).
+.DS
+     [error] formatted message
+.DE
+.IP "\f2exit\fP\ =\ -1"
+Having output the error message,
+.IR E . rror0
+\&..\&
+.IR E . rror8
+send
+.B SIGIOT
+to the current process.
+This is a sure kill and
+will produce a core dump
+for program debugging by
+mdb(1).
+.DS
+     [panic] formatted message
+     [a.out] Panic exit, core dumped. Stop.
+.DE
+.IP "\f2exit\fP\ >\ 0"
+Program termination is realized by
+calling
+.IR SysExit . Exit 
+using
+.I exit
+as exit code:
+.DS
+     [fatal] formatted message
+     [a.out] Exit code 1. Stop.
+.DE
+.LP
+Each call of
+.I AddFatalLine
+defines a further
+line of
+.I text
+inserted by
+.IR E . rror0
+\&..\&
+.IR E . rror8
+into a fatal or panic error message.
+An empty
+string
+can be used to
+clear previously
+defined text.
+.LP
+Error messages are echoed to further files,
+if
+.IR LongStrings \&. Echo
+has been called for
+.I stderr 
+before.
+.LP
+.I EnterInitProc
+defines
+.I proc
+to be called before
+an error message is issued.
+Intended for terminal resetting in
+those cases, the output would otherwise be unreadable
+(f.i. when using
+.IR Windows (3MOD)).
+.I EnterExitProc
+works the other way round
+and defines a
+procedure
+that is called
+after the output of an error message.
+May be used to restore a terminal device. 
+.LP
+.I ClearInitProc
+and
+.I ClearExitProc
+delete preceding definitions by
+.I EnterInitProc
+and
+.IR EnterExitProc \&.
+.LP
+.I done
+returns
+.B TRUE
+if the
+last call of
+.IR E . rror0
+\&..\&
+.IR E . rror8
+was successful,
+more detailed information
+can be obtained
+by
+.I success
+.RI ( FmtExitCode
+is imported from
+.IR Printf ).
+.LP
+.I setmode
+defines a new error handling mode
+.I mode
+which is by default
+set to
+.IR Printf . Default.
+.I getmode
+yields the current mode.
+.LP
+.I Signals
+defines
+.I proc
+to be called,
+if one of the
+signals
+in
+.I set
+is received.
+The meaning of the signals
+suggest their
+partition into
+.I UserSignal
+(assuming these signals are produced by the user)
+and
+.IR FatalSignal \&,
+even if these sets may not be suitable for all
+applications.
+.SH DIAGNOSTICS
+Diagnostic is unnecessary
+unless default
+error handling strategy has been explicitly
+modified
+by prior calls
+of
+.IR setmode \&.
+See
+.IR Printf(3MOD)
+for more details.
+.LP
+Please note that program termination
+depends on a successful output of the error message.
+Errors may result
+from
+illegal format strings
+or from problems when writing to
+.I stderr
+(error code
+.BR CannotWriteStderr ).
+.LP
+Error message issued by
+.I E
+for diagnostic reasons
+will indicate the affected procedure call:
+.IP
+.DS
+[fatal] E.rror3(-1,"%*u",...);
+        Bad Format: too few format elements.
+[a.out] Exit code 204. Stop.
+.DE
+.SH "SEE ALSO"
+.IR mdb(1), 
+.IR signal(2),
+.IR Printf (3MOD),
+.IR LongStrings (3MOD),
+.IR StdIO (3MOD)

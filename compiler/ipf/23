@@ -1,0 +1,72 @@
+Unit =          Module EOP .
+Module =        MODULESY Nptr { Import } Block .
+Nptr =          Pointer .
+Import =        FROMSY Ident { Ident } | IMPORTSY { Ident } .
+Ident =         IDENT SpellIndex .
+SpellIndex =    Number .
+Name =          NAMESY Nptr .
+Block =         { Module | Procedure }
+                  [ BEGINSY StatSequence ] ENDBLOCK .
+Procedure =     PROCEDURESY Nptr [ Block ] .
+StatSequence =  { Statement } .
+Statement =     BECOMES Designator COMMA Expression |
+                CALL ( Name | Designator ) ParamList |
+                IFSY Expression StatSequence
+                  { ELSIFSY Expression StatSequence }
+                  [ ELSESY Expression StatSequence ] ENDSY |
+                WITHSY Designator StatSequence ENDSY |
+                CASESY Expression
+                  { OFSY { ConstElem } COLON StatSequence }
+                  [ ELSESY StatSequence ] ENDSY |
+                LOOPSY StatSequence ENDSY |
+                WHILESY Expression StatSequence ENDSY |
+                REPEATSY StatSequence UNTILSY Expression |
+                FORSY Ident COMMA Expression TOSY Expression
+                  [ BYSY Constant ] StatSequence ENDSY |
+                RETURNSY [ LPARENT Expression RPARENT ] |
+                EXITSY .
+Expression =    SimpleExpr [ RelOp SimpleExpr ] .
+RelOp =         EQL | NEQ | GRT | GEQ | LSS | LEQ | INSY .
+SimpleExpr =    [ MINUS ] Term { AddOp Term } .
+AddOp =         PLUS | MINUS | ORSY .
+Term =          Factor { MulOp Factor } .
+MulOp =         TIMES | SLASH | DIVSY | MODSY | ANDSY .
+Factor =        INTCON Value |
+                CARDCON Value |
+                INTCARCON TypeSet Value |
+                CHARCON Value |
+                REALCON EntryAddr | (* real value in heap *)
+                STRINGCON EntryAddr Length |
+                Designator [ ParamList | SetConstr ] |
+                SetConstr |
+                NOTSY Factor |
+                LPARENT Expression RPARENT .
+TypeSet =       Value . (* of type Stset *)
+SetConstr =     LCONBR { Element } RCONBR .
+Element =       Expression [ RANGE Expression ] .
+Constant =      ConstExpr .
+ConstExpr =     SimpleConstExpr [ RelOp SimpleConstExpr ] .
+SimpleConstExpr = [ PLUS | MINUS ] ConstTerm
+                  { AddOp ConstTerm } .
+ConstTerm =     ConstFact { MulOp ConstFact } .
+ConstFact =     INTCON Value |
+                CARDCON Value [ SymType ] |
+                INTCARCON TypeSet Value |
+                CHARCON Value |
+                REALCON EntryAddr |     (* real value in heap *)
+                STRINGCON EntryAddr Length |
+                QualIdent [ ConstSetConstr | ConstParamList ] |
+                ConstSetConstr |
+                LPARENT ConstExpr RPARENT |
+                NOTSY ConstFact .
+ConstSetConstr = LCONBR { ConstElem } RCONBR .
+ConstElem =     ConstExpr [ RANGE ConstExpr ] .
+ConstParamList = LPARENT ConstExpr { COMMA ConstExpr } RPARENT .
+Value =         Number .
+EntryAddr =     Number .
+Length =        Number .
+Designator =    QualIdent { LBRACK Expression RBRACK |
+                  PERIOD Ident | ARROW } .
+QualIdent =     { Ident PERIOD } Ident .
+ParamList =     LPARENT [ Expression { COMMA Expression } ]
+                  RPARENT .

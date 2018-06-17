@@ -1,0 +1,42 @@
+.TH Delay 3MOD "local:Borchert"
+.SH NAME
+Delay \- output padding in dependence of the baudrate
+.SH SYNOPSIS
+.nf
+TYPE OutProc = PROCEDURE (CHAR);
+
+PROCEDURE InitDelay(baudrate: CARDINAL;
+                    padch: CHAR; outc: OutProc);
+
+PROCEDURE InitDelayFile(baudrate: CARDINAL;
+                        padch: CHAR; fp: FILE);
+
+PROCEDURE Delay(tenthofmillisecs: CARDINAL);
+.fi
+.SH DESCRIPTION
+The procedure
+.I Delay
+is designed to be given
+as parameter to
+.I TputsDelay
+in the module
+.I TermInfo.
+It outputs padding for the given delay time
+(in tenth of milliseconds) and depends on some global variables
+previously set by either
+.I InitDelay
+or
+.I InitDelayFile.
+Padding depends on the
+.I baudrate
+(zero means no padding)
+and the padding character
+.I padch.
+Output is either directed to
+.I fp
+or done by calling
+.I outc
+(similar to the output procedure parameter of
+.IR TputsDelay ).
+.SH "SEE ALSO"
+TermInfo(3MOD)

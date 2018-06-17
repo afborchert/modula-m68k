@@ -1,0 +1,34 @@
+.TH Convers 3MOD "local:Borchert"
+.SH NAME
+Conversions, ConvertOctal, ConvertHex, ConvertCardinal,
+ConvertInteger \- number to string conversions
+.SH SYNOPSIS
+.DS
+PROCEDURE ConvertOctal(num, len: CARDINAL;
+                       VAR str: ARRAY OF CHAR);
+
+PROCEDURE ConvertHex(num, len: CARDINAL;
+                     VAR str: ARRAY OF CHAR);
+
+PROCEDURE ConvertCardinal(num, len: CARDINAL;
+                          VAR str: ARRAY OF CHAR);
+
+PROCEDURE ConvertInteger(num: INTEGER; len: CARDINAL;
+                         VAR str: ARRAY OF CHAR); 
+.DE
+.SH DESCRIPTION
+All conversion routines
+convert the number
+.I num
+to a string
+with at least
+.I n
+characters.
+If
+.I n
+is greater than the number of digits needed,
+blanks are added preceding the number.
+The resulting string is returned in
+.IR str .
+.SH AUTHOR
+Leo Geissmann, ETH Zuerich

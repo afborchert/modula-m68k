@@ -1,0 +1,74 @@
+.de DS
+.br
+.nf
+.if t \{\
+.ft 8
+.ps 8
+.\}
+..
+.de DE
+.br
+.sp 1v
+.fi
+.if t \{\
+.ft 1
+.ps 10
+.\}
+..
+.TH Keywords 3MOD "local:Stanglow"
+.SH NAME
+Keywords, DefineKey, IsKey \- keyword recognition
+.SH SYNOPSIS
+.DS
+VAR
+   ok : BOOLEAN;
+
+PROCEDURE DefineKey (string: ARRAY OF CHAR; key: INTEGER);
+
+PROCEDURE IsKey (string: ARRAY OF CHAR; VAR key: INTEGER)
+   : BOOLEAN;
+.DE
+.SH DESCRIPTION
+.I DefineKey
+defines a keyword
+.I string
+and assigns
+a key value
+.I key
+to it.
+The key value may be
+redefined
+by calling
+.I DefineKey
+with the
+same
+.I string
+again.
+.LP
+.I IsKey
+returns
+.B TRUE
+if
+.I string
+is a keyword
+previously defined
+with
+.IR DefineKey
+and sets
+.I key
+to the last
+key value
+defined for
+.I string .
+.LP
+.SH DIAGNOSTIC
+Any hash table overflow
+is indicated
+by
+.I ok
+=
+.BR FALSE.
+.SH BUGS
+At most
+359 keyword with an total string length of
+about 5.2 KB can be defined.

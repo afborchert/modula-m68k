@@ -1,0 +1,127 @@
+.ds iN "\f2i1\fP\ \&.\&. \f2i8\fP
+.ie t .ds St "\v'.3m'\s+3*\s-3\v'-.3m'
+.el .ds St *
+.de cC
+.IP "\f3\\$1\fP"
+..
+.TH P 3MOD "local:Stanglow"
+.SH NAME
+P, rintf0, rintf1, rintf2, rintf3, rintf4, rintf5, rintf6, rintf7, rintf8, done, success, setmode, getmode \- formatted output to stdout
+.SH SYNOPSIS
+.DS
+(* diagnostic *)
+
+PROCEDURE done () : BOOLEAN;
+
+PROCEDURE success() : FmtExitCode;
+
+(* error handling *)
+
+PROCEDURE setmode (mode : BITSET);
+
+PROCEDURE getmode (VAR mode : BITSET);
+
+(* output *)
+
+PROCEDURE rintf0 (fmt : ARRAY OF CHAR);
+
+PROCEDURE rintf1 (fmt : ARRAY OF CHAR; i1 : ARRAY OF BYTE);
+
+PROCEDURE rintf2 (fmt : ARRAY OF CHAR; i1,i2 : ARRAY OF BYTE);
+
+(* ... *)
+
+PROCEDURE rintf8 (fmt : ARRAY OF CHAR; i1, i2, i3, i4, i5,
+   i6, i7 , i8 : ARRAY OF BYTE);
+.DE
+.SH DESCRIPTION
+.IR P . rintf0
+\&..\&
+.IR P . rintf8
+(the procedures are intended to be called qualified,
+that explains their strange names)
+convert their parameters \*(iN,
+instantiate them into the format string
+.I fmt
+and output the resulting text on
+.IR StdIO.stdout \&.
+Refer to
+.I Printf (3MOD)
+for a detailed description of formatting
+capabilities.
+.LP
+Output of
+.I P
+is echoed to
+all echo files defined
+for
+.I stdout
+by means of
+.IR LongStrings \&. Echo .
+.LP
+.I done
+returns
+.B TRUE
+if the
+last call of
+.IR P . rintf0
+\&..\&
+.IR P . rintf8
+was successful,
+more detailed information
+can be obtained
+by
+.I success
+.RI (FmtExitCode
+is imported from
+.IR Printf).
+.LP
+.I setmode
+defines a new error handling mode
+.I mode
+which is by default
+set to
+.IR Printf . Default.
+.I getmode
+yields the current mode.
+.SH DIAGNOSTICS
+Diagnostic is unnecessary
+unless default
+error handling strategy has been explicitly
+modified
+by prior calls
+of
+.IR setmode \&.
+See
+.IR Printf (3MOD)
+for more details.
+.LP
+In case of error
+.IR P . rintf0
+\&..\&
+.IR P . rintf8
+do not produce any output.
+Errors may result
+from
+illegal format strings
+or from problems when writing to
+.I stdout
+(error code
+.BR CannotWriteStdout ).
+.LP
+Error message issued by
+.I P
+will contain information
+about
+their reason
+and the affected procedure call:
+.IP
+.DS
+[fatal] P.rintf1("%*u",...);
+        Bad Format: too many format elements.
+[a.out] Exit code 201. Stop.
+.DE
+.SH "SEE ALSO"
+.IR Printf (3MOD),
+.IR LongStrings (3MOD),
+.IR StdIO (3MOD)
