@@ -1,11 +1,10 @@
-# modula-m68k
-Historic Modula-2 compiler for the Motorola 68020 architecture
+# Historic Modula-2 compiler for the Motorola 68020 architecture
 
 ## Background
 
 Modula-2 and the origins of our family of Modula-2 compilers have been
 designed and developed at the Department of Computer Science, ETH
-Zurich in Switzerland (see http://www.inf.ethz.ch) by Niklaus Wirth
+Zürich in Switzerland (see http://www.inf.ethz.ch) by Niklaus Wirth
 and his team.
 
 In December 1981, we licensed the sources of the M2M compiler (4-pass
@@ -17,7 +16,7 @@ the ISO/IEC standard 10514-1:1996.
 
 Modula-2 and the origins of our family of Modula-2 compilers have been
 designed and developed at the Department of Computer Science, ETH
-Zurich in Switzerland (see http://www.inf.ethz.ch) by Niklaus Wirth
+Zürich in Switzerland (see http://www.inf.ethz.ch) by Niklaus Wirth
 and his team.
 
 ## Architecture
@@ -29,7 +28,7 @@ release we developed for the Sun 3 running SunOS 4.1.x.
 
 ## License
 
-We have an agreement with the ETH Zurich that the sources which
+We have an agreement with the ETH Zürich that the sources which
 have been derived from the M2M-compiler may be freely redistributed
 provided that
 
@@ -50,14 +49,17 @@ The sources of the library (subdirectories lib and rts) may be freely
 redistributed under the terms of the GNU Library General Public
 License, Version 2 (as found in the file COPYING.LIB).
 
-Note that the MathLib module has been derived from the GNU library
+Note that the _MathLib_ module has been derived from the GNU library
 (distributed under the terms of the GNU Library General Public License)
 which in turn has been derived from sources which have been developed
-at the University of California, Berkeley:
-This product includes software developed by the University of
-California, Berkeley and its contributors.
+at the University of California, Berkeley: This product includes
+software developed by the University of California, Berkeley and its
+contributors.
 
 ## See also
 
-* http://www.mathematik.uni-ulm.de/modula/history/
-* https://github.com/afborchert/modula-3200
+More about the historic bootstrapping process that led to this
+compiler can be found at the following repositories:
+ * https://github.com/afborchert/lilith
+ * https://github.com/afborchert/lilith-multipass-modula2-compiler
+ * https://github.com/afborchert/modula-3200
