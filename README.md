@@ -56,6 +56,11 @@ at the University of California, Berkeley: This product includes
 software developed by the University of California, Berkeley and its
 contributors.
 
+## Downloading binaries
+
+Binaries are available for SunOS 4:
+   https://www.mathematik.uni-ulm.de/modula/downloads/sun3/
+
 ## See also
 
 More about the historic bootstrapping process that led to this
